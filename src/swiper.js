@@ -1,12 +1,12 @@
-import ol_control_Swipe from "ol-ext/control/Swipe";
-import Origo from "Origo";
+import ol_control_Swipe from 'ol-ext/control/Swipe';
+import Origo from 'Origo';
 import SwiperLegend from './swiperLegend';
 
 const Collection = Origo.ol.Collection;
 const TileLayer = Origo.ol.TileLayer;
 
-const SPLIT_MODE = "split";
-const CIRCLE_MODE = "circle";
+const SPLIT_MODE = 'split';
+const CIRCLE_MODE = 'circle';
 
 export function checkIsMobile() {
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -35,7 +35,7 @@ const Swiper = function Swiper(options = {}) {
   let swiperLegendVisible = false;
   let swiperLegendButton;
   let swiperLegend;
-
+  
   let tileLayer;
   let vectorLayers;
 
@@ -43,7 +43,7 @@ const Swiper = function Swiper(options = {}) {
   let buttonsContainerEl;
   let swiperButtonEl;
   let modeButtonEl;
-  let swiperLegendButtonEl; 
+  let swiperLegendButtonEl;
 
   function setActive(state) {
     isActive = state;
@@ -51,10 +51,10 @@ const Swiper = function Swiper(options = {}) {
 
   function toggleSwiper() {
     const detail = {
-      name: "swiper",
+      name: 'swiper',
       active: !isActive,
     };
-    viewer.dispatch("toggleClickInteraction", detail);
+    viewer.dispatch('toggleClickInteraction', detail);
   }
 
   // vectorLayers & tileLayer
@@ -66,8 +66,8 @@ const Swiper = function Swiper(options = {}) {
 
   function enableSwiper() {
     //Do some stuffs with the buttons so they are active and visible
-    swiperButtonEl.classList.add("active");
-    modeButtonEl.classList.remove("hidden");
+    swiperButtonEl.classList.add('active');
+    modeButtonEl.classList.remove('hidden');
     swiperLegendButtonEl.classList.remove('hidden');
 
     if (checkIsMobile()) {
@@ -102,20 +102,20 @@ const Swiper = function Swiper(options = {}) {
     swiperControl.addLayer(layer1, true);
 
     setActive(true);
-    console.log("Enable");
+    console.log('Enable');
   }
 
   function disableSwiper() {
     //Do some stuffs with the buttons so they are inactive and hidden
-    swiperButtonEl.classList.remove("active");
-    swiperLegendButtonEl.classList.remove("active");
-    modeButtonEl.classList.add("hidden");
+    swiperButtonEl.classList.remove('active');
+    swiperLegendButtonEl.classList.remove('active');
+    modeButtonEl.classList.add('hidden');
     swiperLegendButtonEl.classList.add('hidden');
     map.removeControl(swiperControl);
     swiperLegend.setSwiperLegendVisible(false);
     toggleLayer(vectorLayers, false);
     setActive(false);
-    console.log("Disable");
+    console.log('Disable');
   }
 
   function setMode(newMode) {
@@ -123,14 +123,14 @@ const Swiper = function Swiper(options = {}) {
   }
 
   function toggleMode() {
-    console.log("Toggling mode");
+    console.log('Toggling mode');
     if (mode === SPLIT_MODE) {
-      console.log("setting circle mode");
-      modeButtonEl.classList.add("active");
+      console.log('setting circle mode');
+      modeButtonEl.classList.add('active');
       setMode(CIRCLE_MODE);
     } else {
-      console.log("setting split mode");
-      modeButtonEl.classList.remove("active");
+      console.log('setting split mode');
+      modeButtonEl.classList.remove('active');
       setMode(SPLIT_MODE);
     }
   }
@@ -140,16 +140,14 @@ const Swiper = function Swiper(options = {}) {
   }
 
   function toggleSwiperLegend() {
-    console.log('Toggling swiper legend');
-    
     if (swiperLegendVisible) {
-      console.log("Making swiper legend hidden");
-      swiperLegendButtonEl.classList.remove("active");
-      swiperLegend.setSwiperLegendVisible(false)
+      console.log('Making swiper legend hidden');
+      swiperLegendButtonEl.classList.remove('active');
+      swiperLegend.setSwiperLegendVisible(false);
       setSwiperLegendVisible(false);
     } else {
-      console.log("Activating swiper legend");
-      swiperLegendButtonEl.classList.add("active");
+      console.log('Activating swiper legend');
+      swiperLegendButtonEl.classList.add('active');
       swiperLegend.setSwiperLegendVisible(true);
       setSwiperLegendVisible(true);
     }
@@ -161,69 +159,65 @@ const Swiper = function Swiper(options = {}) {
     tileLayer = allLayers.filter(l => l instanceof Origo.ol.layer.Tile);
     //  ortoPhoto = allLayers.filter(l => l instanceof Origo.ol.layer.OrtoPhoto);
     vectorLayers = allLayers.filter(l => l instanceof Origo.ol.layer.Vector);
-
   }
 
   return Origo.ui.Component({
-    name: "swiper",
+    name: 'swiper',
     onInit() {
       swiperLayers = new Collection([], { unique: true });
       swiperButton = Origo.ui.Button({
-        cls:
-          "o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow",
+        cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow',
         click() {
           toggleSwiper();
         },
         icon: '#fa-expand',
-        tooltipText: "Swipe",
-        tooltipPlacement: "east",
+        tooltipText: 'Swipe layer',
+        tooltipPlacement: 'east',
       });
       modeButton = Origo.ui.Button({
-        cls:
-          "o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden",
+        cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
         click() {
           toggleMode();
         },
-        icon: "#fa-polygon-o",
-        tooltipText: "Mode",
-        tooltipPlacement: "east",
+        icon: '#fa-circle-o',
+        tooltipText: 'Mode',
+        tooltipPlacement: 'east',
       });
 
-
       //Swiper legend
-      swiperLegend = SwiperLegend({layerClickHandler: (layerId) => {
-        console.log(layerId);
-      }});
+      swiperLegend = SwiperLegend({
+        layerClickHandler: layerId => {
+          console.log(layerId);
+        },
+      });
 
       swiperLegendButton = Origo.ui.Button({
-        cls:
-          "o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden",
+        cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
         click() {
           toggleSwiperLegend();
         },
-        icon: "#fa-polygon-o",
-        tooltipText: "Swiper legend",
-        tooltipPlacement: "east",
+        icon: '#fa-chevron-right',
+        tooltipText: 'Swiper legend',
+        tooltipPlacement: 'east',
       });
 
-
       buttonsContainer = Origo.ui.Element({
-        tagName: "div",
-        cls: "flex column",
+        tagName: 'div',
+        cls: 'flex column',
       });
     },
     onAdd(evt) {
-      console.log('Running on add')
+      console.log('Running on add');
       viewer = evt.target.api();
       setSwiperLayers();
-      touchMode = "ontouchstart" in document.documentElement;
+      touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getMapTools().getId()}`;
       map = viewer.getMap();
       this.addComponents([swiperButton, modeButton, swiperLegendButton]);
       viewer.addComponent(swiperLegend);
       this.render();
-      viewer.on("toggleClickInteraction", (detail) => {
-        if (detail.name === "swiper" && detail.active) {
+      viewer.on('toggleClickInteraction', detail => {
+        if (detail.name === 'swiper' && detail.active) {
           enableSwiper();
         } else {
           disableSwiper();
@@ -232,9 +226,7 @@ const Swiper = function Swiper(options = {}) {
     },
     render() {
       //Make an html fragment of buttonsContainer, add to DOM and sets DOM-node in module for easy access
-      const buttonsContainerHtmlFragment = Origo.ui.dom.html(
-        buttonsContainer.render()
-      );
+      const buttonsContainerHtmlFragment = Origo.ui.dom.html(buttonsContainer.render());
       document.getElementById(target).appendChild(buttonsContainerHtmlFragment);
       buttonsContainerEl = document.getElementById(buttonsContainer.getId());
 
@@ -254,7 +246,7 @@ const Swiper = function Swiper(options = {}) {
       swiperLegendButtonEl = document.getElementById(swiperLegendButton.getId());
       swiperLegendButton.dispatch('render');
       swiperLegend.render();
-      this.dispatch("render");
+      this.dispatch('render');
     },
   });
 };
