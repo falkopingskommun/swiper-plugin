@@ -8,6 +8,12 @@ const TileLayer = Origo.ol.TileLayer;
 const SPLIT_MODE = "split";
 const CIRCLE_MODE = "circle";
 
+export function checkIsMobile() {
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    return true;
+  }
+}
+
 const Swiper = function Swiper(options = {}) {
   //Basics
   let viewer;
@@ -30,6 +36,9 @@ const Swiper = function Swiper(options = {}) {
   let swiperLegendButton;
   let swiperLegend;
 
+  let tileLayer;
+  let vectorLayers;
+
   //Dom-nodes (not sure if needed, might clean later)
   let buttonsContainerEl;
   let swiperButtonEl;
@@ -48,20 +57,38 @@ const Swiper = function Swiper(options = {}) {
     viewer.dispatch("toggleClickInteraction", detail);
   }
 
+  // vectorLayers & tileLayer
+  function toggleLayer(layer, boolean) {
+    layer.map(tile => {
+      tile.setVisible(boolean);
+    });
+  }
+
   function enableSwiper() {
     //Do some stuffs with the buttons so they are active and visible
     swiperButtonEl.classList.add("active");
     modeButtonEl.classList.remove("hidden");
     swiperLegendButtonEl.classList.remove('hidden');
 
-    //Get some layers
-    const layer1 = swiperLayers[0];
-    const layer2 = swiperLayers[3];
-    layer1.setVisible(true);
-    console.log(layer1)
-    console.log(layer2)
-    //Create and add the control
-    swiperControl = new ol_control_Swipe({position: 0.8});
+    if (checkIsMobile()) {
+      swiperControl = new ol_control_Swipe({
+        layers: vectorLayers,
+        rightLayer: null,
+        className: 'ol-swipe',
+        position: 0,
+        orientation: 'horizontal',
+      });
+    } else {
+      swiperControl = new ol_control_Swipe({
+        layers: vectorLayers,
+        rightLayer: tileLayer,
+        className: 'ol-swipe',
+        position: 0,
+        orientation: 'vertical',
+      });
+    }
+    toggleLayer(vectorLayers, true);
+    // vectorLayers.on('change:visible', event => { });
     map.addControl(swiperControl);
     swiperControl.addLayer(layer1);
     swiperControl.addLayer(layer2, true);
@@ -86,6 +113,7 @@ const Swiper = function Swiper(options = {}) {
     swiperLegendButtonEl.classList.add('hidden');
     map.removeControl(swiperControl);
     swiperLegend.setSwiperLegendVisible(false);
+    toggleLayer(vectorLayers, false);
     setActive(false);
     console.log("Disable");
   }
@@ -129,10 +157,11 @@ const Swiper = function Swiper(options = {}) {
 
   function setSwiperLayers() {
     const allLayers = viewer.getLayers();
-    console.log(Origo.ol)
-    const filteredLayers = allLayers.filter((l) => l instanceof Origo.ol.layer.Tile);
-    swiperLayers = filteredLayers;
-    console.log(swiperLayers);
+    console.log('allLayers: ' + allLayers);
+    tileLayer = allLayers.filter(l => l instanceof Origo.ol.layer.Tile);
+    //  ortoPhoto = allLayers.filter(l => l instanceof Origo.ol.layer.OrtoPhoto);
+    vectorLayers = allLayers.filter(l => l instanceof Origo.ol.layer.Vector);
+
   }
 
   return Origo.ui.Component({
@@ -145,7 +174,7 @@ const Swiper = function Swiper(options = {}) {
         click() {
           toggleSwiper();
         },
-        icon: "#fa-map-marker",
+        icon: '#fa-expand',
         tooltipText: "Swipe",
         tooltipPlacement: "east",
       });

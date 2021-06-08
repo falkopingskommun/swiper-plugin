@@ -37,8 +37,7 @@ const SwiperLegend = function SwiperLegend(options = {}) {
     let pos3 = 0;
     let pos4 = 0;
   
-    function elementDrag(evt) {
-      const e = evt || window.event;
+    function elementDrag(e) {
       e.preventDefault();
       // calculate the new cursor position:
       pos1 = pos3 - e.clientX;
@@ -51,13 +50,13 @@ const SwiperLegend = function SwiperLegend(options = {}) {
     }
   
     function closeDragElement() {
-      /* stop moving when mouse button is released: */
+      /* stop moving when mouse button or touch is released: */
       document.onmouseup = null;
       document.onmousemove = null;
+      document.ontouchend = null;
     }
   
-    function dragMouseDown(evt) {
-      const e = evt || window.event;
+    function dragMouseDown(e) {
       e.preventDefault();
       // get the mouse cursor position at startup:
       pos3 = e.clientX;
@@ -111,7 +110,7 @@ const SwiperLegend = function SwiperLegend(options = {}) {
       contentContainerEl = document.createElement('ul');
         
       headerContainerEl.classList.add('swiper-header');
-      headerContainerEl.innerHTML = 'Left side legend';
+      headerContainerEl.innerHTML = 'Ortofoto';
       headerContainerEl.id = `${windowContainerEl.id}-draggable`;
 
       contentContainerEl.classList.add('swiper-content');
