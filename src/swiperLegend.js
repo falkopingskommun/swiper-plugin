@@ -48,7 +48,7 @@ const SwiperLegend = function SwiperLegend(options = {}) {
       elmnt.style.top = `${elmnt.offsetTop - pos2}px`;
       elmnt.style.left = `${elmnt.offsetLeft - pos1}px`;
     }
-  
+
     function closeDragElement() {
       /* stop moving when mouse button or touch is released: */
       document.onmouseup = null;

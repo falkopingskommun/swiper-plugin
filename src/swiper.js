@@ -35,7 +35,7 @@ const Swiper = function Swiper(options = {}) {
   let swiperLegendVisible = false;
   let swiperLegendButton;
   let swiperLegend;
-  
+
   let tileLayer;
   let vectorLayers;
 
@@ -81,25 +81,24 @@ const Swiper = function Swiper(options = {}) {
     } else {
       swiperControl = new ol_control_Swipe({
         layers: vectorLayers,
-        rightLayer: tileLayer,
+        rightLayer: null,
         className: 'ol-swipe',
         position: 0,
         orientation: 'vertical',
       });
     }
     toggleLayer(vectorLayers, true);
-    // vectorLayers.on('change:visible', event => { });
     map.addControl(swiperControl);
-    swiperControl.addLayer(layer1);
-    swiperControl.addLayer(layer2, true);
-    layer1.on('change:visible', (event) => {
-      console.log('Changing visible of layer one. LEFT', event)
-      layer1.setVisible(true);
-      console.log(viewer.getLayers())
-    })
 
-
-    swiperControl.addLayer(layer1, true);
+    // vectorLayers.on('change:visible', event => { });
+    // swiperControl.addLayer(layer1);
+    // swiperControl.addLayer(layer2, true);
+    // layer1.on('change:visible', (event) => {
+    //   console.log('Changing visible of layer one. LEFT', event)
+    //   layer1.setVisible(true);
+    //   console.log(viewer.getLayers())
+    // })
+    // swiperControl.addLayer(layer1, true);
 
     setActive(true);
     console.log('Enable');
