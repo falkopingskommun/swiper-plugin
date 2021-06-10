@@ -7,6 +7,11 @@ const TileLayer = Origo.ol.TileLayer;
 
 const SPLIT_MODE = 'split';
 const CIRCLE_MODE = 'circle';
+let activeBackgroundLayer = null;
+
+export function setActiveBackgroundLayer(layer) {
+  activeBackgroundLayer = layer;
+}
 
 export function checkIsMobile() {
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -28,7 +33,6 @@ const Swiper = function Swiper(options = {}) {
   let swiperLayerNames = options ? options.layers : undefined; // Används inte nu, borde få till detta senare.
   let swiperButton;
   let modeButton;
-  let legendButton;
   let mode = SPLIT_MODE;
   let swiperControl;
 
@@ -59,9 +63,11 @@ const Swiper = function Swiper(options = {}) {
 
   // vectorLayers & tileLayer
   function toggleLayer(layer, boolean) {
-    layer.map(tile => {
-      tile.setVisible(boolean);
-    });
+    if (layer) {
+      layer.map(tile => {
+        tile.setVisible(boolean);
+      });
+    }
   }
 
   function enableSwiper() {
@@ -99,7 +105,6 @@ const Swiper = function Swiper(options = {}) {
     //   console.log(viewer.getLayers())
     // })
     // swiperControl.addLayer(layer1, true);
-
     setActive(true);
     console.log('Enable');
   }
@@ -112,7 +117,7 @@ const Swiper = function Swiper(options = {}) {
     swiperLegendButtonEl.classList.add('hidden');
     map.removeControl(swiperControl);
     swiperLegend.setSwiperLegendVisible(false);
-    toggleLayer(vectorLayers, false);
+
     setActive(false);
     console.log('Disable');
   }
@@ -156,7 +161,6 @@ const Swiper = function Swiper(options = {}) {
     const allLayers = viewer.getLayers();
     console.log('allLayers: ' + allLayers);
     tileLayer = allLayers.filter(l => l instanceof Origo.ol.layer.Tile);
-    //  ortoPhoto = allLayers.filter(l => l instanceof Origo.ol.layer.OrtoPhoto);
     vectorLayers = allLayers.filter(l => l instanceof Origo.ol.layer.Vector);
   }
 
@@ -170,7 +174,7 @@ const Swiper = function Swiper(options = {}) {
           toggleSwiper();
         },
         icon: '#fa-expand',
-        tooltipText: 'Swipe layer',
+        tooltipText: 'Swipe between layers',
         tooltipPlacement: 'east',
       });
       modeButton = Origo.ui.Button({
@@ -179,11 +183,10 @@ const Swiper = function Swiper(options = {}) {
           toggleMode();
         },
         icon: '#fa-circle-o',
-        tooltipText: 'Mode',
+        tooltipText: 'Circle between layers',
         tooltipPlacement: 'east',
       });
 
-      //Swiper legend
       swiperLegend = SwiperLegend({
         layerClickHandler: layerId => {
           console.log(layerId);
@@ -196,7 +199,7 @@ const Swiper = function Swiper(options = {}) {
           toggleSwiperLegend();
         },
         icon: '#fa-chevron-right',
-        tooltipText: 'Swiper legend',
+        tooltipText: 'Change left layer',
         tooltipPlacement: 'east',
       });
 
@@ -217,6 +220,7 @@ const Swiper = function Swiper(options = {}) {
       this.render();
       viewer.on('toggleClickInteraction', detail => {
         if (detail.name === 'swiper' && detail.active) {
+          toggleSwiperLegend();
           enableSwiper();
         } else {
           disableSwiper();

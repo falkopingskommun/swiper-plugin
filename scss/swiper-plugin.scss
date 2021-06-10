@@ -1,32 +1,3 @@
-.swiper-window-container {
-    background-color: white;
-    border-radius: 0.5em;
-    box-shadow: 0 0 8px #888;
-    font-size: 12px;
-    font-weight: normal;
-    position: absolute;
-    right: 26em;
-    top: 6em;
-    width: 320px;
-    z-index: 1;
-  }
-
-  .swiper-header {
-    padding: 0.5rem;
-    border-bottom: rgb(182, 182, 182);
-    border-width: 1px;
-    border-bottom-style: solid;
-    font-weight: bold;
-    cursor: move;
-  }
-
-  .swiper-content {
-    margin: 1rem,
-  }
-
-  .swiper-content-list-item {
-      margin: 0.5rem 0 0.5rem 0.5rem !important;
-  }
 button {
   cursor: pointer;
 }
