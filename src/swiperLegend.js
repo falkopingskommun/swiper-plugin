@@ -77,6 +77,35 @@ const addStyle = () => {
       cursor: move;
       opacity: 0.5;
     }`);
+
+  document.styleSheets[document.styleSheets.length - 1].insertRule(`
+  @media only screen and (max-width: 1024px) {
+   .o-map .ol-viewport .ol-unselectable {
+      box-shadow: none;
+      position: relative;
+      }
+    }`);
+
+  document.styleSheets[document.styleSheets.length - 1].insertRule(`
+  @media only screen and (max-width: 1024px) {
+   .o-map .ol-viewport .ol-unselectable button {
+      position: absolute;
+      right: 0;
+      fill: #4a4a4a;
+      opacity: 0.9;
+      cursor: pointer;
+      height: 2em;
+      width: 2em;
+      padding: 5px;
+      font-size: inherit;
+      }
+    }`);
+
+  document.styleSheets[document.styleSheets.length - 1].insertRule(`
+  @media only screen and (max-width: 1024px) {
+   .o-map .ol-viewport .ol-unselectable button:after {
+    content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5L105 105M5 105L105 5" stroke="rgb(74, 74, 74)" stroke-width="10" stroke-linecap="round"/></svg>');
+    }`);
 };
 
 addStyle();

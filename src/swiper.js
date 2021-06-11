@@ -1,12 +1,11 @@
 import ol_control_Swipe from 'ol-ext/control/Swipe';
 import Origo from 'Origo';
 import SwiperLegend from './swiperLegend';
+import ol_interaction_Clip from 'ol-ext/interaction/Clip';
 
 const Collection = Origo.ol.Collection;
 const TileLayer = Origo.ol.TileLayer;
 
-const SPLIT_MODE = 'split';
-const CIRCLE_MODE = 'circle';
 let activeBackgroundLayer = null;
 
 export function setActiveBackgroundLayer(layer) {
@@ -24,21 +23,20 @@ const Swiper = function Swiper(options = {}) {
   let viewer;
   let map;
   let target;
-  let isActive = false;
   let touchMode;
 
   //Plugin specific
   let buttonsContainer;
-  let swiperLayers;
-  let swiperLayerNames = options ? options.layers : undefined; // Används inte nu, borde få till detta senare.
-  let swiperButton;
-  let modeButton;
-  let mode = SPLIT_MODE;
   let swiperControl;
+  let swiperButton;
+  let swiperLayers;
+  let circleButton;
 
   let swiperLegendVisible = false;
+  let circleLayerVisible = false;
   let swiperLegendButton;
   let swiperLegend;
+  let circleLayer;
 
   let tileLayer;
   let vectorLayers;
@@ -46,112 +44,122 @@ const Swiper = function Swiper(options = {}) {
   //Dom-nodes (not sure if needed, might clean later)
   let buttonsContainerEl;
   let swiperButtonEl;
-  let modeButtonEl;
   let swiperLegendButtonEl;
-
-  function setActive(state) {
-    isActive = state;
-  }
+  let circleButtonEl;
 
   function toggleSwiper() {
     const detail = {
       name: 'swiper',
-      active: !isActive,
+      active: !swiperLegendVisible,
     };
     viewer.dispatch('toggleClickInteraction', detail);
   }
 
-  // vectorLayers & tileLayer
   function toggleLayer(layer, boolean) {
     if (layer) {
       layer.map(tile => {
         tile.setVisible(boolean);
       });
     }
+    // Maybe we need this later
+    // tileLayer.on('change:visible', event => { });
+    // swiperControl.addLayer(tileLayer, true);
+    //   layer1.setVisible(true);
+    // })
+  }
+
+  function enableCircle() {
+    map.addInteraction(circleLayer);
+    setCircleVisible(true);
+  }
+
+  function showMenuButtons() {
+    swiperButtonEl.classList.remove('hidden');
+    circleButtonEl.classList.remove('hidden');
+    swiperLegendButtonEl.classList.remove('hidden');
+
+    swiperButtonEl.classList.add('active');
+    circleButtonEl.classList.add('active');
+    swiperLegendButtonEl.classList.add('active');
+  }
+
+  function hideMenuButtons() {
+    circleButtonEl.classList.remove('active');
+    circleButtonEl.classList.add('hidden');
+
+    swiperLegendButtonEl.classList.remove('active');
+    swiperLegendButtonEl.classList.add('hidden');
   }
 
   function enableSwiper() {
-    //Do some stuffs with the buttons so they are active and visible
-    swiperButtonEl.classList.add('active');
-    modeButtonEl.classList.remove('hidden');
-    swiperLegendButtonEl.classList.remove('hidden');
-
     if (checkIsMobile()) {
       swiperControl = new ol_control_Swipe({
-        layers: vectorLayers,
-        rightLayer: null,
+        layers: tileLayer,
+        rightLayer: tileLayer,
         className: 'ol-swipe',
         position: 0,
         orientation: 'horizontal',
       });
     } else {
       swiperControl = new ol_control_Swipe({
-        layers: vectorLayers,
-        rightLayer: null,
+        layers: tileLayer,
+        rightLayer: tileLayer,
         className: 'ol-swipe',
         position: 0,
         orientation: 'vertical',
       });
     }
-    toggleLayer(vectorLayers, true);
-    map.addControl(swiperControl);
 
-    // vectorLayers.on('change:visible', event => { });
-    // swiperControl.addLayer(layer1);
-    // swiperControl.addLayer(layer2, true);
-    // layer1.on('change:visible', (event) => {
-    //   console.log('Changing visible of layer one. LEFT', event)
-    //   layer1.setVisible(true);
-    //   console.log(viewer.getLayers())
-    // })
-    // swiperControl.addLayer(layer1, true);
-    setActive(true);
-    console.log('Enable');
+    swiperControl.addLayer(vectorLayers[-1], true);
+    toggleLayer(vectorLayers[-1], true);
+
+    map.addControl(swiperControl);
+    setSwiperLegendVisible(true);
+    console.log('Enable swiper');
   }
 
   function disableSwiper() {
-    //Do some stuffs with the buttons so they are inactive and hidden
-    swiperButtonEl.classList.remove('active');
-    swiperLegendButtonEl.classList.remove('active');
-    modeButtonEl.classList.add('hidden');
-    swiperLegendButtonEl.classList.add('hidden');
     map.removeControl(swiperControl);
     swiperLegend.setSwiperLegendVisible(false);
-
-    setActive(false);
-    console.log('Disable');
+    setSwiperLegendVisible(false);
+    console.log('Disable swiper');
   }
 
-  function setMode(newMode) {
-    mode = newMode;
-  }
-
-  function toggleMode() {
-    console.log('Toggling mode');
-    if (mode === SPLIT_MODE) {
-      console.log('setting circle mode');
-      modeButtonEl.classList.add('active');
-      setMode(CIRCLE_MODE);
-    } else {
-      console.log('setting split mode');
-      modeButtonEl.classList.remove('active');
-      setMode(SPLIT_MODE);
-    }
+  function disableCircleLayer() {
+    circleButtonEl.classList.remove('active');
+    circleButtonEl.classList.add('hidden');
+    map.removeInteraction(circleLayer);
+    setCircleVisible(false);
+    console.log('Disable circle');
   }
 
   function setSwiperLegendVisible(state) {
     swiperLegendVisible = state;
   }
 
+  function setCircleVisible(state) {
+    circleLayerVisible = state;
+  }
+
+  function toggleCircleMode() {
+    if (circleLayerVisible) {
+      console.log('Circle mode');
+      map.addInteraction(circleLayer);
+      setCircleVisible(true);
+    } else {
+      console.log('Swipe mode');
+      map.removeInteraction(circleLayer);
+      setCircleVisible(false);
+    }
+  }
+
   function toggleSwiperLegend() {
     if (swiperLegendVisible) {
       console.log('Making swiper legend hidden');
-      swiperLegendButtonEl.classList.remove('active');
       swiperLegend.setSwiperLegendVisible(false);
       setSwiperLegendVisible(false);
     } else {
       console.log('Activating swiper legend');
-      swiperLegendButtonEl.classList.add('active');
       swiperLegend.setSwiperLegendVisible(true);
       setSwiperLegendVisible(true);
     }
@@ -177,21 +185,17 @@ const Swiper = function Swiper(options = {}) {
         tooltipText: 'Swipe between layers',
         tooltipPlacement: 'east',
       });
-      modeButton = Origo.ui.Button({
+      circleButton = Origo.ui.Button({
         cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
         click() {
-          toggleMode();
+          enableCircle();
         },
         icon: '#fa-circle-o',
         tooltipText: 'Circle between layers',
         tooltipPlacement: 'east',
       });
 
-      swiperLegend = SwiperLegend({
-        layerClickHandler: layerId => {
-          console.log(layerId);
-        },
-      });
+      swiperLegend = SwiperLegend({});
 
       swiperLegendButton = Origo.ui.Button({
         cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
@@ -215,15 +219,29 @@ const Swiper = function Swiper(options = {}) {
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getMapTools().getId()}`;
       map = viewer.getMap();
-      this.addComponents([swiperButton, modeButton, swiperLegendButton]);
+      this.addComponents([swiperButton, circleButton, swiperLegendButton]);
       viewer.addComponent(swiperLegend);
       this.render();
+      circleLayer = new ol_interaction_Clip({ radius: 100, layers: tileLayer });
       viewer.on('toggleClickInteraction', detail => {
+        showMenuButtons();
         if (detail.name === 'swiper' && detail.active) {
           toggleSwiperLegend();
           enableSwiper();
-        } else {
+          disableCircleLayer();
+          toggleCircleMode();
+        }
+        if (detail.name === 'circleLayer' && detail.active) {
+          toggleCircleMode();
+          enableCircle();
           disableSwiper();
+          toggleSwiperLegend();
+        } else {
+          disableCircleLayer();
+          disableSwiper();
+
+          toggleCircleMode();
+          toggleSwiperLegend();
         }
       });
     },
@@ -239,16 +257,18 @@ const Swiper = function Swiper(options = {}) {
       swiperButtonEl = document.getElementById(swiperButton.getId());
 
       //Make an html fragment of mode toggle button, add to DOM and sets DOM-node in module for easy access
-      const modeButtonHtmlFragment = Origo.ui.dom.html(modeButton.render());
+      const modeButtonHtmlFragment = Origo.ui.dom.html(circleButton.render());
       buttonsContainerEl.appendChild(modeButtonHtmlFragment);
-      modeButtonEl = document.getElementById(modeButton.getId());
+      circleButtonEl = document.getElementById(circleButton.getId());
 
       //Make an html fragment of mode toggle button, add to DOM and sets DOM-node in module for easy access
       const swiperLegendButtonHtmlFragment = Origo.ui.dom.html(swiperLegendButton.render());
       buttonsContainerEl.appendChild(swiperLegendButtonHtmlFragment);
       swiperLegendButtonEl = document.getElementById(swiperLegendButton.getId());
+
       swiperLegendButton.dispatch('render');
       swiperLegend.render();
+      buttonsContainerEl.classList.add('active');
       this.dispatch('render');
     },
   });
