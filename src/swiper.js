@@ -7,6 +7,7 @@ const Collection = Origo.ol.Collection;
 const TileLayer = Origo.ol.TileLayer;
 
 let activeBackgroundLayer = null;
+let allLayers;
 
 export function setActiveBackgroundLayer(layer) {
   activeBackgroundLayer = layer;
@@ -29,11 +30,10 @@ const Swiper = function Swiper(options = {}) {
   let buttonsContainer;
   let swiperControl;
   let swiperButton;
-  let swiperLayers;
   let circleButton;
 
-  let swiperLegendVisible = false;
-  let circleLayerVisible = false;
+  let isSwiperVisible = false;
+  let isCircleVisible = false;
   let swiperLegendButton;
   let swiperLegend;
   let circleLayer;
@@ -47,14 +47,6 @@ const Swiper = function Swiper(options = {}) {
   let swiperLegendButtonEl;
   let circleButtonEl;
 
-  function toggleSwiper() {
-    const detail = {
-      name: 'swiper',
-      active: !swiperLegendVisible,
-    };
-    viewer.dispatch('toggleClickInteraction', detail);
-  }
-
   function toggleLayer(layer, boolean) {
     if (layer) {
       layer.map(tile => {
@@ -66,11 +58,6 @@ const Swiper = function Swiper(options = {}) {
     // swiperControl.addLayer(tileLayer, true);
     //   layer1.setVisible(true);
     // })
-  }
-
-  function enableCircle() {
-    map.addInteraction(circleLayer);
-    setCircleVisible(true);
   }
 
   function showMenuButtons() {
@@ -92,6 +79,7 @@ const Swiper = function Swiper(options = {}) {
   }
 
   function enableSwiper() {
+    showMenuButtons();
     if (checkIsMobile()) {
       swiperControl = new ol_control_Swipe({
         layers: tileLayer,
@@ -102,7 +90,7 @@ const Swiper = function Swiper(options = {}) {
       });
     } else {
       swiperControl = new ol_control_Swipe({
-        layers: tileLayer,
+        layers: allLayers,
         rightLayer: tileLayer,
         className: 'ol-swipe',
         position: 0,
@@ -110,63 +98,55 @@ const Swiper = function Swiper(options = {}) {
       });
     }
 
-    swiperControl.addLayer(vectorLayers[-1], true);
-    toggleLayer(vectorLayers[-1], true);
-
+    // toggleLayer(tileLayer, true);
+    swiperControl.addLayer(tileLayer, false);
     map.addControl(swiperControl);
-    setSwiperLegendVisible(true);
-    console.log('Enable swiper');
+    swiperLegend.setSwiperLegendVisible(false);
+    setSwiperLegendVisible(false);
+  }
+
+  function clearMapLayers() {
+    map.getLayers().forEach(layer => {
+      //   if (layer.get('name') && layer.get('name') === 'vector') {
+      if (layer) {
+        console.log('layer name: ' + layer.get('name'));
+        map.removeLayer(layer);
+      }
+    });
   }
 
   function disableSwiper() {
     map.removeControl(swiperControl);
     swiperLegend.setSwiperLegendVisible(false);
     setSwiperLegendVisible(false);
-    console.log('Disable swiper');
   }
 
-  function disableCircleLayer() {
-    circleButtonEl.classList.remove('active');
-    circleButtonEl.classList.add('hidden');
+  function disableCircle() {
     map.removeInteraction(circleLayer);
     setCircleVisible(false);
-    console.log('Disable circle');
   }
 
   function setSwiperLegendVisible(state) {
-    swiperLegendVisible = state;
+    isSwiperVisible = state;
   }
 
   function setCircleVisible(state) {
-    circleLayerVisible = state;
+    isCircleVisible = state;
   }
 
-  function toggleCircleMode() {
-    if (circleLayerVisible) {
-      console.log('Circle mode');
-      map.addInteraction(circleLayer);
-      setCircleVisible(true);
-    } else {
-      console.log('Swipe mode');
-      map.removeInteraction(circleLayer);
-      setCircleVisible(false);
-    }
+  function showCircle() {
+    map.addInteraction(circleLayer);
+    setCircleVisible(true);
   }
 
-  function toggleSwiperLegend() {
-    if (swiperLegendVisible) {
-      console.log('Making swiper legend hidden');
-      swiperLegend.setSwiperLegendVisible(false);
-      setSwiperLegendVisible(false);
-    } else {
-      console.log('Activating swiper legend');
-      swiperLegend.setSwiperLegendVisible(true);
-      setSwiperLegendVisible(true);
-    }
+  function showSwiperLayer() {
+    map.addControl(swiperControl);
+    swiperLegend.setSwiperLegendVisible(true);
+    setSwiperLegendVisible(true);
   }
 
   function setSwiperLayers() {
-    const allLayers = viewer.getLayers();
+    allLayers = viewer.getLayers();
     console.log('allLayers: ' + allLayers);
     tileLayer = allLayers.filter(l => l instanceof Origo.ol.layer.Tile);
     vectorLayers = allLayers.filter(l => l instanceof Origo.ol.layer.Vector);
@@ -175,11 +155,17 @@ const Swiper = function Swiper(options = {}) {
   return Origo.ui.Component({
     name: 'swiper',
     onInit() {
-      swiperLayers = new Collection([], { unique: true });
+      //   swiperLayers = new Collection([], { unique: true });
       swiperButton = Origo.ui.Button({
         cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow',
         click() {
-          toggleSwiper();
+          if (!isSwiperVisible) {
+            enableSwiper();
+          } else {
+            disableSwiper();
+            disableCircle();
+            hideMenuButtons();
+          }
         },
         icon: '#fa-expand',
         tooltipText: 'Swipe between layers',
@@ -188,7 +174,13 @@ const Swiper = function Swiper(options = {}) {
       circleButton = Origo.ui.Button({
         cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
         click() {
-          enableCircle();
+          if (!isCircleVisible) {
+            disableSwiper();
+            showCircle();
+          } else {
+            disableCircle();
+            disableSwiper();
+          }
         },
         icon: '#fa-circle-o',
         tooltipText: 'Circle between layers',
@@ -200,7 +192,13 @@ const Swiper = function Swiper(options = {}) {
       swiperLegendButton = Origo.ui.Button({
         cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
         click() {
-          toggleSwiperLegend();
+          if (!isSwiperVisible) {
+            disableCircle();
+            showSwiperLayer();
+          } else {
+            disableSwiper();
+            disableCircle();
+          }
         },
         icon: '#fa-chevron-right',
         tooltipText: 'Change left layer',
@@ -222,27 +220,9 @@ const Swiper = function Swiper(options = {}) {
       this.addComponents([swiperButton, circleButton, swiperLegendButton]);
       viewer.addComponent(swiperLegend);
       this.render();
-      circleLayer = new ol_interaction_Clip({ radius: 100, layers: tileLayer });
-      viewer.on('toggleClickInteraction', detail => {
-        showMenuButtons();
-        if (detail.name === 'swiper' && detail.active) {
-          toggleSwiperLegend();
-          enableSwiper();
-          disableCircleLayer();
-          toggleCircleMode();
-        }
-        if (detail.name === 'circleLayer' && detail.active) {
-          toggleCircleMode();
-          enableCircle();
-          disableSwiper();
-          toggleSwiperLegend();
-        } else {
-          disableCircleLayer();
-          disableSwiper();
-
-          toggleCircleMode();
-          toggleSwiperLegend();
-        }
+      circleLayer = new ol_interaction_Clip({
+        radius: 100,
+        layers: tileLayer,
       });
     },
     render() {
