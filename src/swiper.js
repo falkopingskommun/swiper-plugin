@@ -3,8 +3,9 @@ import Origo from 'Origo';
 import SwiperLegend from './swiperLegend';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
 
-const Collection = Origo.ol.Collection;
-const TileLayer = Origo.ol.TileLayer;
+const olFeature = Origo.ol.Feature;
+const olCollection = Origo.ol.Collection;
+const olOverlay = Origo.ol.Overlay;
 
 let activeBackgroundLayer = null;
 let allLayers;
@@ -82,8 +83,8 @@ const Swiper = function Swiper(options = {}) {
     showMenuButtons();
     if (checkIsMobile()) {
       swiperControl = new ol_control_Swipe({
-        layers: tileLayer,
-        rightLayer: tileLayer,
+        layers: allLayers,
+        rightLayer: activeBackgroundLayer,
         className: 'ol-swipe',
         position: 0,
         orientation: 'horizontal',
@@ -91,18 +92,18 @@ const Swiper = function Swiper(options = {}) {
     } else {
       swiperControl = new ol_control_Swipe({
         layers: allLayers,
-        rightLayer: tileLayer,
+        rightLayer: activeBackgroundLayer,
         className: 'ol-swipe',
         position: 0,
         orientation: 'vertical',
       });
     }
 
-    // toggleLayer(tileLayer, true);
-    swiperControl.addLayer(tileLayer, false);
+   toggleLayer(tileLayer, true);
+
     map.addControl(swiperControl);
-    swiperLegend.setSwiperLegendVisible(false);
-    setSwiperLegendVisible(false);
+    swiperLegend.setSwiperLegendVisible(true);
+    setSwiperLegendVisible(true);
   }
 
   function clearMapLayers() {
@@ -222,7 +223,7 @@ const Swiper = function Swiper(options = {}) {
       this.render();
       circleLayer = new ol_interaction_Clip({
         radius: 100,
-        layers: tileLayer,
+        layers: allLayers
       });
     },
     render() {
