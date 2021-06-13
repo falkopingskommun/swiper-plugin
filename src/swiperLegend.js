@@ -206,7 +206,7 @@ const SwiperLegend = function SwiperLegend(options = {}) {
       target = `${viewer.getMain().getId()}`;
       map = viewer.getMap();
 
-      allBackgroundLayers = viewer.getLayersByProperty('group', 'background');
+      allBackgroundLayers = viewer.getLayersByProperty('group', 'flygbilder').reverse();
       console.log('backgroundLayers: ' + allBackgroundLayers);
     },
     render() {
@@ -221,7 +221,7 @@ const SwiperLegend = function SwiperLegend(options = {}) {
 
       headerContainerEl = document.createElement('div');
       headerContainerEl.className = 'legend-layer-header';
-      headerContainerEl.innerHTML = 'Ortofoto';
+      headerContainerEl.innerHTML = 'Flygbilder';
       headerContainerEl.id = `${legendLayerContainer.id}-draggable`;
 
       const legendCloseButton = document.createElement('div');
