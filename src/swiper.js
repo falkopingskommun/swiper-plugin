@@ -20,7 +20,7 @@ export function checkIsMobile() {
   }
 }
 
-const Swiper = function Swiper(options = {}) {
+const Swiper = function Swiper({circleRadius}) {
   //Basics
   let viewer;
   let map;
@@ -38,6 +38,7 @@ const Swiper = function Swiper(options = {}) {
   let swiperLegendButton;
   let swiperLegend;
   let circleLayer;
+  let circleRadiusOption = circleRadius;
 
   let tileLayer;
   let vectorLayers;
@@ -222,7 +223,7 @@ const Swiper = function Swiper(options = {}) {
       viewer.addComponent(swiperLegend);
       this.render();
       circleLayer = new ol_interaction_Clip({
-        radius: 100,
+        radius: circleRadiusOption ? circleRadiusOption : 100,
         layers: allLayers
       });
     },
