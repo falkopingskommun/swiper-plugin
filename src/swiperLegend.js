@@ -221,7 +221,7 @@ const SwiperLegend = function SwiperLegend(options = {}) {
 
       headerContainerEl = document.createElement('div');
       headerContainerEl.className = 'legend-layer-header';
-      headerContainerEl.innerHTML = 'Flygbilder';
+      headerContainerEl.innerHTML = 'Lager';
       headerContainerEl.id = `${legendLayerContainer.id}-draggable`;
 
       const legendCloseButton = document.createElement('div');
