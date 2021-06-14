@@ -109,6 +109,7 @@ const addStyle = () => {
 };
 
 addStyle();
+export let swiperLayersConfig;
 
 const SwiperLegend = function SwiperLegend(options = {}) {
   //Basics
@@ -122,8 +123,6 @@ const SwiperLegend = function SwiperLegend(options = {}) {
   let legendLayerContainer;
   let headerContainerEl;
   let contentContainerEl;
-
-  let allBackgroundLayers;
 
   function setSwiperLegendVisible(state) {
     isVisible = state;
@@ -182,7 +181,7 @@ const SwiperLegend = function SwiperLegend(options = {}) {
   }
 
   function renderLayersList() {
-    allBackgroundLayers.forEach(element => {
+    swiperLayersConfig.forEach(element => {
       const legendLayersListItem = document.createElement('li');
       legendLayersListItem.innerHTML = element.get('title');
       legendLayersListItem.id = element.get('id');
@@ -205,9 +204,10 @@ const SwiperLegend = function SwiperLegend(options = {}) {
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getId()}`;
       map = viewer.getMap();
+      //   allBackgroundLayers = viewer.getLayersByProperty('group', 'flygbilder').reverse();
 
-      allBackgroundLayers = viewer.getLayersByProperty('group', 'flygbilder').reverse();
-      console.log('backgroundLayers: ' + allBackgroundLayers);
+      swiperLayersConfig = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
+      console.log('swiperLayers: ' + swiperLayersConfig);
     },
     render() {
       legendLayerContainer = document.createElement('div');

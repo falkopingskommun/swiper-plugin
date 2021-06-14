@@ -1,13 +1,13 @@
 import ol_control_Swipe from 'ol-ext/control/Swipe';
 import Origo from 'Origo';
-import SwiperLegend from './swiperLegend';
+import SwiperLegend, { swiperLayersConfig } from './swiperLegend';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
 
 const olFeature = Origo.ol.Feature;
 const olCollection = Origo.ol.Collection;
 const olOverlay = Origo.ol.Overlay;
 
-let activeBackgroundLayer = null;
+let activeBackgroundLayer;
 let allLayers;
 
 export function setActiveBackgroundLayer(layer) {
@@ -20,7 +20,7 @@ export function checkIsMobile() {
   }
 }
 
-const Swiper = function Swiper({circleRadius}) {
+const Swiper = function Swiper({ circleRadius }) {
   //Basics
   let viewer;
   let map;
@@ -39,6 +39,8 @@ const Swiper = function Swiper({circleRadius}) {
   let swiperLegend;
   let circleLayer;
   let circleRadiusOption = circleRadius;
+  let activeMapLayer;
+  let swiperLayers;
 
   let tileLayer;
   let vectorLayers;
@@ -52,7 +54,7 @@ const Swiper = function Swiper({circleRadius}) {
   function toggleLayer(layer, boolean) {
     if (layer) {
       layer.map(tile => {
-        tile.setVisible(boolean);
+        if (tile) return tile.setVisible(boolean);
       });
     }
     // Maybe we need this later
@@ -75,25 +77,27 @@ const Swiper = function Swiper({circleRadius}) {
 
   function enableSwiper() {
     showMenuButtons();
+    toggleLayer(swiperLayers, true);
     if (checkIsMobile()) {
       swiperControl = new ol_control_Swipe({
-        layers: allLayers,
-        rightLayer: activeBackgroundLayer,
+        layers: swiperLayers,
+        rightLayer: swiperLayers,
         className: 'ol-swipe',
         position: 0,
         orientation: 'horizontal',
       });
     } else {
       swiperControl = new ol_control_Swipe({
-        layers: allLayers,
-        rightLayer: activeBackgroundLayer,
+        layers: swiperLayers,
+        rightLayer: swiperLayers,
         className: 'ol-swipe',
         position: 0,
         orientation: 'vertical',
       });
     }
 
-    toggleLayer(tileLayer, true);
+    swiperControl.removeLayer(activeMapLayer, false);
+    swiperControl.addLayer(swiperLayers, false);
 
     map.addControl(swiperControl);
     setSwiperVisible(true);
@@ -133,13 +137,8 @@ const Swiper = function Swiper({circleRadius}) {
     setCircleVisible(true);
   }
 
-  function showSwiperLayer() {
-    map.addControl(swiperControl);
-    swiperLegend.setSwiperLegendVisible(true);
-    setSwiperVisible(true);
-  }
-
-  function setSwiperLayers() {
+  function setSwiperLayers(viewer) {
+    swiperLayers = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
     allLayers = viewer.getLayers();
     console.log('allLayers: ' + allLayers);
     tileLayer = allLayers.filter(l => l instanceof Origo.ol.layer.Tile);
@@ -203,16 +202,17 @@ const Swiper = function Swiper({circleRadius}) {
     onAdd(evt) {
       console.log('Running on add');
       viewer = evt.target.api();
-      setSwiperLayers();
+      setSwiperLayers(viewer);
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getMapTools().getId()}`;
       map = viewer.getMap();
+      activeMapLayer = viewer.getMap();
       this.addComponents([swiperButton, circleButton, swiperLegendButton]);
       viewer.addComponent(swiperLegend);
       this.render();
       circleLayer = new ol_interaction_Clip({
         radius: circleRadiusOption ? circleRadiusOption : 100,
-        layers: allLayers
+        layers: swiperLayers,
       });
     },
     render() {
