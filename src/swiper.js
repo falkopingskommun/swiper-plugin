@@ -181,7 +181,7 @@ const Swiper = function Swiper({circleRadius}) {
             showCircle();
           } else {
             disableCircle();
-            disableSwiper();
+            enableSwiper();
           }
         },
         icon: '#fa-circle-o',
