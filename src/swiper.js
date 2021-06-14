@@ -66,17 +66,10 @@ const Swiper = function Swiper({circleRadius}) {
     swiperButtonEl.classList.remove('hidden');
     circleButtonEl.classList.remove('hidden');
     swiperLegendButtonEl.classList.remove('hidden');
-
-    swiperButtonEl.classList.add('active');
-    circleButtonEl.classList.add('active');
-    swiperLegendButtonEl.classList.add('active');
   }
 
   function hideMenuButtons() {
-    circleButtonEl.classList.remove('active');
     circleButtonEl.classList.add('hidden');
-
-    swiperLegendButtonEl.classList.remove('active');
     swiperLegendButtonEl.classList.add('hidden');
   }
 
@@ -168,7 +161,7 @@ const Swiper = function Swiper({circleRadius}) {
             hideMenuButtons();
           }
         },
-        icon: '#fa-expand',
+        icon: '#ic_compare_24px',
         tooltipText: 'Swipe between layers',
         tooltipPlacement: 'east',
       });
@@ -245,7 +238,6 @@ const Swiper = function Swiper({circleRadius}) {
 
       swiperLegendButton.dispatch('render');
       swiperLegend.render();
-      buttonsContainerEl.classList.add('active');
       this.dispatch('render');
     },
   });
