@@ -100,11 +100,10 @@ const Swiper = function Swiper({circleRadius}) {
       });
     }
 
-   toggleLayer(tileLayer, true);
+    toggleLayer(tileLayer, true);
 
     map.addControl(swiperControl);
-    swiperLegend.setSwiperLegendVisible(true);
-    setSwiperLegendVisible(true);
+    setSwiperVisible(true);
   }
 
   function clearMapLayers() {
@@ -120,7 +119,7 @@ const Swiper = function Swiper({circleRadius}) {
   function disableSwiper() {
     map.removeControl(swiperControl);
     swiperLegend.setSwiperLegendVisible(false);
-    setSwiperLegendVisible(false);
+    setSwiperVisible(false);
   }
 
   function disableCircle() {
@@ -128,7 +127,7 @@ const Swiper = function Swiper({circleRadius}) {
     setCircleVisible(false);
   }
 
-  function setSwiperLegendVisible(state) {
+  function setSwiperVisible(state) {
     isSwiperVisible = state;
   }
 
@@ -144,7 +143,7 @@ const Swiper = function Swiper({circleRadius}) {
   function showSwiperLayer() {
     map.addControl(swiperControl);
     swiperLegend.setSwiperLegendVisible(true);
-    setSwiperLegendVisible(true);
+    setSwiperVisible(true);
   }
 
   function setSwiperLayers() {
@@ -194,16 +193,12 @@ const Swiper = function Swiper({circleRadius}) {
       swiperLegendButton = Origo.ui.Button({
         cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
         click() {
-          if (!isSwiperVisible) {
-            disableCircle();
-            showSwiperLayer();
-          } else {
-            disableSwiper();
-            disableCircle();
+          if (isSwiperVisible || isCircleVisible) {
+            swiperLegend.setSwiperLegendVisible(true);
           }
         },
-        icon: '#fa-chevron-right',
-        tooltipText: 'Change left layer',
+        icon: '#ic_layers_24px',
+        tooltipText: 'Lager',
         tooltipPlacement: 'east',
       });
 
