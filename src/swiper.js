@@ -8,14 +8,6 @@ export let oneSwiperLayer;
 let isSwiperLayer;
 let activeMapLayer;
 
-
-
-
-
-
-  }
-}
-
 const Swiper = function Swiper({ circleRadius }) {
   //Basics
   let viewer;
