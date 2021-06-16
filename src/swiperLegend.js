@@ -1,5 +1,5 @@
 import Origo from 'Origo';
-import { oneSwiperLayer } from './swiper';
+import { setOneSwiperLayer } from './swiper';
 
 const addStyle = () => {
   document.styleSheets[document.styleSheets.length - 1].insertRule(`
@@ -190,7 +190,7 @@ const SwiperLegend = function SwiperLegend(options = {}) {
 
       legendLayersListItem.addEventListener('click', () => {
         const swiperLayer = element.get('id');
-        oneSwiperLayer(swiperLayer);
+        setOneSwiperLayer(swiperLayer);
       });
     });
   }

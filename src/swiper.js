@@ -1,47 +1,43 @@
-import ol_control_Swipe from 'ol-ext/control/Swipe';
 import Origo from 'Origo';
-import SwiperLegend from './swiperLegend';
+import ol_control_Swipe from 'ol-ext/control/Swipe';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
+import SwiperLegend from './swiperLegend';
 import { checkIsMobile } from './functions';
 
-export let oneSwiperLayer;
-let isSwiperLayer;
-let activeMapLayer;
+let oneSwiperLayer;
+
+export function setOneSwiperLayer(swiperLayer) {
+  oneSwiperLayer = swiperLayer;
+  console.log('oneSwiperLayer: ' + oneSwiperLayer);
+}
 
 const Swiper = function Swiper({ circleRadius }) {
-  //Basics
   let viewer;
   let map;
   let target;
   let touchMode;
 
-  //Plugin specific
   let buttonsContainer;
   let swiperControl;
+  let circleControl;
+
   let swiperButton;
   let circleButton;
 
   let isSwiperVisible = false;
   let isCircleVisible = false;
+
+  let isSwiperLayer;
+  let circleRadiusOption = circleRadius;
+  let activeMapLayer;
+
   let swiperLegendButton;
   let swiperLegend;
-  let circleLayer;
-  let circleRadiusOption = circleRadius;
 
-
-  //Dom-nodes (not sure if needed, might clean later)
   let buttonsContainerEl;
   let swiperButtonEl;
   let swiperLegendButtonEl;
   let circleButtonEl;
-
-  function toggleLayer(layer, boolean) {
-    if (layer) {
-      layer.map(tile => {
-        if (tile) return tile.setVisible(boolean);
-      });
-    }
-  }
 
   function showMenuButtons() {
     swiperButtonEl.classList.remove('hidden');
@@ -56,40 +52,24 @@ const Swiper = function Swiper({ circleRadius }) {
 
   function enableSwiper() {
     showMenuButtons();
-    toggleLayer(isSwiperLayer, true);
-    if (checkIsMobile()) {
-      swiperControl = new ol_control_Swipe({
-        layers: isSwiperLayer,
-        rightLayer: isSwiperLayer,
-        className: 'ol-swipe',
-        position: 0,
-        orientation: 'horizontal',
-      });
-    } else {
-      swiperControl = new ol_control_Swipe({
-        layers: isSwiperLayer,
-        rightLayer: isSwiperLayer,
-        className: 'ol-swipe',
-        position: 0,
-        orientation: 'vertical',
-      });
-    }
 
-    swiperControl.removeLayer(activeMapLayer, false);
+    swiperControl = new ol_control_Swipe({
+      layer: isSwiperLayer,
+      rightLayer: oneSwiperLayer | activeMapLayer,
+      orientation: checkIsMobile() ? 'horizontal' : 'vertical',
+    });
+    // toggleLayer(isSwiperLayer, true);
+    // oneSwiperLayer.setVisible(true);
+    swiperControl.removeLayer(isSwiperLayer, false);
     swiperControl.addLayer(isSwiperLayer, false);
-
     map.addControl(swiperControl);
+
     setSwiperVisible(true);
   }
 
-  function clearMapLayers() {
-    map.getLayers().forEach(layer => {
-      //   if (layer.get('name') && layer.get('name') === 'vector') {
-      if (layer) {
-        console.log('layer name: ' + layer.get('name'));
-        map.removeLayer(layer);
-      }
-    });
+  function enableCircle() {
+    map.addInteraction(circleControl);
+    setCircleVisible(true);
   }
 
   function disableSwiper() {
@@ -99,7 +79,7 @@ const Swiper = function Swiper({ circleRadius }) {
   }
 
   function disableCircle() {
-    map.removeInteraction(circleLayer);
+    map.removeInteraction(circleControl);
     setCircleVisible(false);
   }
 
@@ -111,12 +91,7 @@ const Swiper = function Swiper({ circleRadius }) {
     isCircleVisible = state;
   }
 
-  function showCircle() {
-    map.addInteraction(circleLayer);
-    setCircleVisible(true);
-  }
-
-  // get swiperlayers is true from config file in origo project
+  // get swiperlayers from config file in origo
   function setSwiperLayer(viewer) {
     isSwiperLayer = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
   }
@@ -124,7 +99,7 @@ const Swiper = function Swiper({ circleRadius }) {
   return Origo.ui.Component({
     name: 'swiper',
     onInit() {
-      //   swiperLayers = new Collection([], { unique: true });
+      //   isSwiperLayer = new Collection([], { unique: true });   // Maybe we can use this later, otherwise delete
       swiperButton = Origo.ui.Button({
         cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow',
         click() {
@@ -145,7 +120,7 @@ const Swiper = function Swiper({ circleRadius }) {
         click() {
           if (!isCircleVisible) {
             disableSwiper();
-            showCircle();
+            enableCircle();
           } else {
             disableCircle();
             enableSwiper();
@@ -187,7 +162,7 @@ const Swiper = function Swiper({ circleRadius }) {
       viewer.addComponent(swiperLegend);
       this.render();
 
-      circleLayer = new ol_interaction_Clip({
+      circleControl = new ol_interaction_Clip({
         radius: circleRadiusOption | 100,
         layer: isSwiperLayer
       });

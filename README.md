@@ -3,6 +3,7 @@
 To start project
 
 For now 2021-06-16
+Some useful? layer functions in functions.js
 USE BRANCH SWIPER IN ORIGO PROJECT 
 
 In the Origo project index.html import swiper component
