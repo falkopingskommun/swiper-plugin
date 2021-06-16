@@ -4,9 +4,6 @@ import SwiperLegend, { swiperLayersConfig } from './swiperLegend';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
 import { checkIsMobile } from './functions';
 
-const olFeature = Origo.ol.Feature;
-const olCollection = Origo.ol.Collection;
-const olOverlay = Origo.ol.Overlay;
 
 let activeBackgroundLayer;
 let allLayers;
@@ -58,11 +55,6 @@ const Swiper = function Swiper({ circleRadius }) {
         if (tile) return tile.setVisible(boolean);
       });
     }
-    // Maybe we need this later
-    // tileLayer.on('change:visible', event => { });
-    // swiperControl.addLayer(tileLayer, true);
-    //   layer1.setVisible(true);
-    // })
   }
 
   function showMenuButtons() {
@@ -141,9 +133,6 @@ const Swiper = function Swiper({ circleRadius }) {
   function setSwiperLayers(viewer) {
     swiperLayers = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
     allLayers = viewer.getLayers();
-    console.log('allLayers: ' + allLayers);
-    tileLayer = allLayers.filter(l => l instanceof Origo.ol.layer.Tile);
-    vectorLayers = allLayers.filter(l => l instanceof Origo.ol.layer.Vector);
   }
 
   return Origo.ui.Component({
@@ -201,7 +190,6 @@ const Swiper = function Swiper({ circleRadius }) {
       });
     },
     onAdd(evt) {
-      console.log('Running on add');
       viewer = evt.target.api();
       setSwiperLayers(viewer);
       touchMode = 'ontouchstart' in document.documentElement;
