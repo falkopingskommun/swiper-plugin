@@ -56,19 +56,19 @@ const Swiper = function Swiper({ circleRadius }) {
 
   function enableSwiper() {
     showMenuButtons();
-    toggleLayer(swiperLayers, true);
+    toggleLayer(isSwiperLayer, true);
     if (checkIsMobile()) {
       swiperControl = new ol_control_Swipe({
-        layers: swiperLayers,
-        rightLayer: swiperLayers,
+        layers: isSwiperLayer,
+        rightLayer: isSwiperLayer,
         className: 'ol-swipe',
         position: 0,
         orientation: 'horizontal',
       });
     } else {
       swiperControl = new ol_control_Swipe({
-        layers: swiperLayers,
-        rightLayer: swiperLayers,
+        layers: isSwiperLayer,
+        rightLayer: isSwiperLayer,
         className: 'ol-swipe',
         position: 0,
         orientation: 'vertical',
@@ -76,7 +76,7 @@ const Swiper = function Swiper({ circleRadius }) {
     }
 
     swiperControl.removeLayer(activeMapLayer, false);
-    swiperControl.addLayer(swiperLayers, false);
+    swiperControl.addLayer(isSwiperLayer, false);
 
     map.addControl(swiperControl);
     setSwiperVisible(true);
