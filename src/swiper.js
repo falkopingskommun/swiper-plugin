@@ -1,16 +1,14 @@
 import ol_control_Swipe from 'ol-ext/control/Swipe';
 import Origo from 'Origo';
-import SwiperLegend, { swiperLayersConfig } from './swiperLegend';
+import SwiperLegend from './swiperLegend';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
 import { checkIsMobile } from './functions';
 
+export let oneSwiperLayer;
+let isSwiperLayer;
+let activeMapLayer;
 
-let activeBackgroundLayer;
-let allLayers;
 
-export function setActiveBackgroundLayer(layer) {
-  activeBackgroundLayer = layer;
-}
 
 
 
@@ -37,11 +35,7 @@ const Swiper = function Swiper({ circleRadius }) {
   let swiperLegend;
   let circleLayer;
   let circleRadiusOption = circleRadius;
-  let activeMapLayer;
-  let swiperLayers;
 
-  let tileLayer;
-  let vectorLayers;
 
   //Dom-nodes (not sure if needed, might clean later)
   let buttonsContainerEl;
@@ -130,9 +124,9 @@ const Swiper = function Swiper({ circleRadius }) {
     setCircleVisible(true);
   }
 
-  function setSwiperLayers(viewer) {
-    swiperLayers = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
-    allLayers = viewer.getLayers();
+  // get swiperlayers is true from config file in origo project
+  function setSwiperLayer(viewer) {
+    isSwiperLayer = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
   }
 
   return Origo.ui.Component({
@@ -191,17 +185,19 @@ const Swiper = function Swiper({ circleRadius }) {
     },
     onAdd(evt) {
       viewer = evt.target.api();
-      setSwiperLayers(viewer);
+      map = viewer.getMap();
+      activeMapLayer = map;
+      setSwiperLayer(viewer);
+
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getMapTools().getId()}`;
-      map = viewer.getMap();
-      activeMapLayer = viewer.getMap();
       this.addComponents([swiperButton, circleButton, swiperLegendButton]);
       viewer.addComponent(swiperLegend);
       this.render();
+
       circleLayer = new ol_interaction_Clip({
-        radius: circleRadiusOption ? circleRadiusOption : 100,
-        layers: swiperLayers,
+        radius: circleRadiusOption | 100,
+        layer: isSwiperLayer
       });
     },
     render() {

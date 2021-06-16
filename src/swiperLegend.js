@@ -1,5 +1,5 @@
 import Origo from 'Origo';
-import { setActiveBackgroundLayer } from './swiper';
+import { oneSwiperLayer } from './swiper';
 
 const addStyle = () => {
   document.styleSheets[document.styleSheets.length - 1].insertRule(`
@@ -189,8 +189,8 @@ const SwiperLegend = function SwiperLegend(options = {}) {
       contentContainerEl.appendChild(legendLayersListItem);
 
       legendLayersListItem.addEventListener('click', () => {
-        setActiveBackgroundLayer(element.get('id'));
-        console.log('legendLayersListItem: ' + element.get('id'));
+        const swiperLayer = element.get('id');
+        oneSwiperLayer(swiperLayer);
       });
     });
   }
@@ -199,15 +199,12 @@ const SwiperLegend = function SwiperLegend(options = {}) {
     name: 'swiperLegend',
     onInit() {},
     onAdd(evt) {
-      setActiveBackgroundLayer(evt);
       viewer = evt.target;
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getId()}`;
       map = viewer.getMap();
-      //   allBackgroundLayers = viewer.getLayersByProperty('group', 'flygbilder').reverse();
 
       swiperLayersConfig = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
-      console.log('swiperLayers: ' + swiperLayersConfig);
     },
     render() {
       legendLayerContainer = document.createElement('div');
