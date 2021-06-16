@@ -2,6 +2,7 @@ import ol_control_Swipe from 'ol-ext/control/Swipe';
 import Origo from 'Origo';
 import SwiperLegend, { swiperLayersConfig } from './swiperLegend';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
+import { checkIsMobile } from './functions';
 
 const olFeature = Origo.ol.Feature;
 const olCollection = Origo.ol.Collection;
@@ -14,9 +15,9 @@ export function setActiveBackgroundLayer(layer) {
   activeBackgroundLayer = layer;
 }
 
-export function checkIsMobile() {
-  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    return true;
+
+
+
   }
 }
 
