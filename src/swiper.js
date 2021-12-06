@@ -1,6 +1,7 @@
 import Origo from 'Origo';
 import ol_control_Swipe from 'ol-ext/control/Swipe';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
+import SwiperLayer from './swiperLayer';
 import SwiperLegend from './swiperLegend';
 import { checkIsMobile } from './functions';
 
@@ -12,6 +13,7 @@ const Swiper = function Swiper({ circleRadius = 50,
   let touchMode;
   let _visibleLeftLayer;
   let _visibleRightLayer;
+  let _layers = {};
 
   let buttonsContainer;
   let swiperControl;
@@ -78,6 +80,7 @@ const Swiper = function Swiper({ circleRadius = 50,
   }
 
   function showLayerOnController(controller, layer, showLayer = true) {
+    const layerId = layer.get('id');
     if (showLayer) {
       controller.addLayer(layer);
     } else {
@@ -85,6 +88,7 @@ const Swiper = function Swiper({ circleRadius = 50,
     }
     
     layer.setVisible(showLayer);
+    _layers[layerId].setAsShown(showLayer);
   }
 
   function enableCircle() {
@@ -130,24 +134,64 @@ const Swiper = function Swiper({ circleRadius = 50,
     return swiperEnabledLayers;
   }
   
-  function resetSwiperLayer(swiperLayerName) {
-  // remove old layer
-  let oldLayer = _visibleLeftLayer;
-
-  const toBeSwiperLayer = viewer.getLayer(swiperLayerName);
-  _visibleLeftLayer = toBeSwiperLayer;
-  console.log('new left side - layer:', swiperLayerName);
+  function resetSwiperLayer(layerId) {
+    // remove old layer
+    let oldLayer = _visibleLeftLayer;
   
-  // add new layer
-  const selectedControl = swiperControl || circleControl;
-  showLayerOnController(selectedControl, _visibleLeftLayer);
+    if (_layers[layerId].inUse()) {
+      console.log('the layer ', layerId, 'is in use');
+      return false;
+    }
 
-  if (oldLayer) {
-    console.log('removing left side - layer', oldLayer.get('name'))
-    showLayerOnController(selectedControl, oldLayer, false);
+    const toBeSwiperLayer = _layers[layerId].getLayer();
+    _visibleLeftLayer = toBeSwiperLayer;
+    console.log('new left side - layer:', _layers[layerId].getName());
+    
+    // add new layer
+    const selectedControl = swiperControl || circleControl;
+    showLayerOnController(selectedControl, _visibleLeftLayer);
+  
+    if (oldLayer) {
+      console.log('removing left side - layer', oldLayer.get('name'))
+      showLayerOnController(selectedControl, oldLayer, false);
+    }
+    console.log('resetSwiperLayer - end');
+    return true;
   }
-  console.log('resetSwiperLayer - end');
-}
+
+  function getSwiperLayers(layers) {
+    layers.forEach(la => {
+      _layers[la.get('id')] = new SwiperLayer(la, false, false);
+    });
+    return _layers;
+  }
+
+  function setupLayers(viewer) {
+    const layers = findSwiperLayers(viewer);
+    console.log('visible layers', layers.length, layers.map(l => l.get('name')))
+
+    const swiperLayers = getSwiperLayers(layers);
+
+    // setting right layer
+    _visibleRightLayer = layers.find(l => l.get('visible'));
+    if (!_visibleRightLayer) {
+      // if none of the swiper layers is already visible => it must be another layer, 
+      // find it and show that one on right hand side
+      _visibleRightLayer = viewer.getLayers().filter(layer => !layer.get('isSwiperLayer'))
+                                              .find(l => (backgroundGroups != null && backgroundGroups.find(l.get('group'))) 
+                                                        && l.get('visible'));
+    } else {
+      swiperLayers[_visibleRightLayer.get('id')].setAsShownOnRight();
+    }
+    console.log('right layer', _visibleRightLayer.get('name'))
+
+    // setting leftt layer
+    _visibleLeftLayer = layers.find(l => !l.get('visible'));
+    swiperLayers[_visibleLeftLayer.get('id')].setAsShown();
+    _visibleLeftLayer.getLayerState().visible
+
+    console.log('left layer', _visibleLeftLayer.get('name'))
+  }
 
   return Origo.ui.Component({
     name: 'swiper',
@@ -223,17 +267,7 @@ const Swiper = function Swiper({ circleRadius = 50,
       //      and it should be disabled to select on the swiperLegend
       // 4.1.2 if affects left (is the same as left) => pick first in the SwiperLayer list which is not in Use and show it (mark it left=true)
 
-      let layers = findSwiperLayers(viewer);
-      console.log('visible layers', layers.length, layers)
-      _visibleRightLayer = layers.find(l => l.get('visible'));
-      if (!_visibleRightLayer) {
-        _visibleRightLayer = viewer.getLayers().filter(layer => !layer.get('isSwiperLayer'))
-                                               .find(l => backgroundGroups.contains(l.get('group')) 
-                                                          && l.get('visible'));
-      }
-      _visibleLeftLayer = layers.find(l => !l.get('visible'));
-      console.log('left layer', _visibleLeftLayer.get('name'))
-      _visibleLeftLayer.getLayerState().visible
+      setupLayers(viewer);
 
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getMapTools().getId()}`;
@@ -266,7 +300,7 @@ const Swiper = function Swiper({ circleRadius = 50,
       swiperLegendButtonEl = document.getElementById(swiperLegendButton.getId());
 
       swiperLegendButton.dispatch('render');
-      swiperLegend.render();
+      swiperLegend.render(_layers);
       this.dispatch('render');
       console.info('render - end');
     },

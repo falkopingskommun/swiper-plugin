@@ -108,14 +108,14 @@ const addStyle = () => {
 };
 
 addStyle();
-export let swiperLayersConfig;
+// export let swiperLayersConfig;
 
 const SwiperLegend = function SwiperLegend(options = {
       showLayer: () =>{console.log('showLayer not defined')}
     }) {
   //Basics
-  let viewer;
-  let map;
+  // let viewer;
+  // let map;
   let target;
   let isVisible = false;
   let touchMode;
@@ -181,17 +181,33 @@ const SwiperLegend = function SwiperLegend(options = {
     }
   }
 
-  function renderLayersList() {
-    swiperLayersConfig.forEach(element => {
+  function resetLayerList(swiperLayers) {
+    contentContainerEl.children.forEach(lElem => {
+      const swLayer = swiperLayers[lElem.id];
+      if (swLayer.inUse()) {
+        console.log('adding class disabled to', lElem.id);
+        lElem.classList.add('disabled');
+      } else {
+        console.log('removing class disabled to', lElem.id);
+        lElem.classList.remove('disabled');
+      }
+    });
+  }
+
+  function renderLayersList(swiperLayers) {
+    const keys = Object.keys(swiperLayers);
+    keys.forEach(layerId => {
+      const swLayer = swiperLayers[layerId];
       const legendLayersListItem = document.createElement('li');
-      legendLayersListItem.innerHTML = element.get('title');
-      legendLayersListItem.id = element.get('id');
-      legendLayersListItem.className = 'legend-list-item';
+      legendLayersListItem.innerHTML = swLayer.getLayer().get('title');
+      legendLayersListItem.id = layerId;
+      legendLayersListItem.className = `legend-list-item ${swLayer.inUse() ? 'disabled' : ''}`;
       contentContainerEl.appendChild(legendLayersListItem);
 
       legendLayersListItem.addEventListener('click', () => {
-        const swiperLayer = element.get('name');
-        options.showLayer(swiperLayer);
+        if (options.showLayer(layerId)) {
+          resetLayerList(swiperLayers);
+        }
       });
     });
   }
@@ -200,14 +216,14 @@ const SwiperLegend = function SwiperLegend(options = {
     name: 'swiperLegend',
     onInit() {},
     onAdd(evt) {
-      viewer = evt.target;
+      const viewer = evt.target;
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getId()}`;
-      map = viewer.getMap();
+      //map = viewer.getMap();
 
-      swiperLayersConfig = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
+      // swiperLayersConfig = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
     },
-    render() {
+    render(swiperLayers) {
       legendLayerContainer = document.createElement('div');
       legendLayerContainer.className = 'legend-layer-container';
       legendLayerContainer.classList.add('legend-layer-container', 'hidden');
@@ -234,7 +250,7 @@ const SwiperLegend = function SwiperLegend(options = {
       legendLayerContainer.appendChild(contentContainerEl);
 
       makeElementDraggable(legendLayerContainer);
-      renderLayersList();
+      renderLayersList(swiperLayers);
       this.dispatch('render');
     },
     setSwiperLegendVisible
