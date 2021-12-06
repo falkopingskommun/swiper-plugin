@@ -1,5 +1,4 @@
 import Origo from 'Origo';
-import { setOneSwiperLayer } from './swiper';
 
 const addStyle = () => {
   document.styleSheets[document.styleSheets.length - 1].insertRule(`
@@ -111,7 +110,9 @@ const addStyle = () => {
 addStyle();
 export let swiperLayersConfig;
 
-const SwiperLegend = function SwiperLegend(options = {}) {
+const SwiperLegend = function SwiperLegend(options = {
+      showLayer: () =>{console.log('showLayer not defined')}
+    }) {
   //Basics
   let viewer;
   let map;
@@ -189,8 +190,8 @@ const SwiperLegend = function SwiperLegend(options = {}) {
       contentContainerEl.appendChild(legendLayersListItem);
 
       legendLayersListItem.addEventListener('click', () => {
-        const swiperLayer = element.get('id');
-        setOneSwiperLayer(swiperLayer);
+        const swiperLayer = element.get('name');
+        options.showLayer(swiperLayer);
       });
     });
   }
