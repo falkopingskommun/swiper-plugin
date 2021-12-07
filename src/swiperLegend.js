@@ -185,10 +185,8 @@ const SwiperLegend = function SwiperLegend(options = {
     contentContainerEl.children.forEach(lElem => {
       const swLayer = swiperLayers[lElem.id];
       if (swLayer.inUse()) {
-        console.log('adding class disabled to', lElem.id);
         lElem.classList.add('disabled');
       } else {
-        console.log('removing class disabled to', lElem.id);
         lElem.classList.remove('disabled');
       }
     });
@@ -216,7 +214,7 @@ const SwiperLegend = function SwiperLegend(options = {
     name: 'swiperLegend',
     onInit() {},
     onAdd(evt) {
-      const viewer = evt.target;
+      let viewer = evt.target;
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getId()}`;
       //map = viewer.getMap();
@@ -253,7 +251,8 @@ const SwiperLegend = function SwiperLegend(options = {
       renderLayersList(swiperLayers);
       this.dispatch('render');
     },
-    setSwiperLegendVisible
+    setSwiperLegendVisible,
+    resetLayerList
   });
 };
 

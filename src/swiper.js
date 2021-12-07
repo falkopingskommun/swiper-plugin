@@ -14,6 +14,7 @@ const Swiper = function Swiper({ circleRadius = 50,
   let _visibleLeftLayer;
   let _visibleRightLayer;
   let _layers = {};
+  let _switchingLayers = false;
 
   let buttonsContainer;
   let swiperControl;
@@ -65,6 +66,7 @@ const Swiper = function Swiper({ circleRadius = 50,
 
     if (isNew) {
       // adding right side
+      disableVisibilityEvent();
       console.log('right side - layer', swiperEnabledLayers.length, 
                   swiperEnabledLayers.map(l => l.get('name')));
       swiperControl.addLayer(_visibleRightLayer, true);
@@ -73,6 +75,7 @@ const Swiper = function Swiper({ circleRadius = 50,
       console.log('left side - layer', activeLeftLayer.get('name'))
       showLayerOnController(swiperControl, activeLeftLayer);
       console.log("is new swiper control");
+      enableVisibilityEvent();
     }
     console.log("adding swiper to the control");
 
@@ -82,6 +85,7 @@ const Swiper = function Swiper({ circleRadius = 50,
   function showLayerOnController(controller, layer, showLayer = true) {
     const layerId = layer.get('id');
     if (showLayer) {
+      controller.removeLayer(layer);
       controller.addLayer(layer);
     } else {
       controller.removeLayer(layer);
@@ -89,6 +93,7 @@ const Swiper = function Swiper({ circleRadius = 50,
     
     layer.setVisible(showLayer);
     _layers[layerId].setAsShown(showLayer);
+    console.log(layerId, 'visibility', showLayer);
   }
 
   function enableCircle() {
@@ -120,6 +125,16 @@ const Swiper = function Swiper({ circleRadius = 50,
     console.info('disabling circle');
   }
 
+  function disableVisibilityEvent() {
+    _switchingLayers = true;
+  }
+  function enableVisibilityEvent() {
+    _switchingLayers = false;
+  }
+  function isVisibilityEventEnabled() {
+    return !_switchingLayers;
+  }
+
   function setSwiperVisible(state) {
     isSwiperVisible = state;
   }
@@ -143,6 +158,8 @@ const Swiper = function Swiper({ circleRadius = 50,
       return false;
     }
 
+    disableVisibilityEvent();
+
     const toBeSwiperLayer = _layers[layerId].getLayer();
     _visibleLeftLayer = toBeSwiperLayer;
     console.log('new left side - layer:', _layers[layerId].getName());
@@ -155,13 +172,102 @@ const Swiper = function Swiper({ circleRadius = 50,
       console.log('removing left side - layer', oldLayer.get('name'))
       showLayerOnController(selectedControl, oldLayer, false);
     }
+    
+    enableVisibilityEvent();
+    
     console.log('resetSwiperLayer - end');
     return true;
   }
 
+  function caseRightAndLeftShowSameLayer(currentLayerId, currentVisibility) {
+    const keys = Object.keys(_layers);
+    // set hidden layer as notShown
+    _layers[currentLayerId].setAsShown(false);
+
+    // Get the visible layer
+    var keyInUse = keys.find((key) => key != currentLayerId && _layers[key].inUse());
+    console.log('layer in use:', keyInUse);
+    const swRightLayer = _layers[keyInUse];
+
+    // get the right layer (if it is a swiperLayer) or first unused layer
+    var newLeftKey = keys.find((key) => key == currentLayerId ||
+                                      (key != keyInUse && !_layers[key].inUse()));
+    console.log("change left layer to:", newLeftKey);
+    resetSwiperLayer(newLeftKey);
+    console.log("left layer shown:", newLeftKey);
+    
+    disableVisibilityEvent();
+    swRightLayer.setAsShownOnRight(true);
+    const theLayer = swRightLayer.getLayer();
+    if (swiperControl) {
+      swiperControl.addLayer(theLayer, true);
+    } else if (circleControl) {
+      disableCircle();
+      enableCircle();
+    }
+    theLayer.setVisible(true);
+    _visibleRightLayer = theLayer;
+    enableVisibilityEvent();
+
+    /*
+    console.log("layer to the right:", keyInUse);
+    console.info('left', currentLayerId, _layers[currentLayerId].inUse(), _layers[currentLayerId].right, _layers[currentLayerId].left);
+    console.info('right', keyInUse, _layers[keyInUse].inUse(), _layers[keyInUse].right, _layers[keyInUse].left);
+    var leftLayer = viewer.getLayer(_layers[currentLayerId].getName());
+    var rightLayer = viewer.getLayer(_layers[keyInUse].getName());
+    console.info('viewer-left', currentLayerId, leftLayer.get('visible'));
+    console.info('viewer-right', keyInUse, rightLayer.get('visible'));
+    */
+
+    swiperLegend.resetLayerList(_layers);
+  }
+
+  function caseRightChangesLayer(layerId1, visibility1,
+                                layerId2, visibility2) {
+
+    // just update the visibility on the _layers
+    _layers[layerId1].setAsShownOnRight(visibility1);
+    _layers[layerId2].setAsShownOnRight(visibility2);
+    swiperLegend.resetLayerList(_layers);
+  }
+
+  let _switchOuterLayersTimeout = null;
+  let _memorySwitch = null;
+  function doesChangeAffectLayerVisibility_2(visibilityChangeEvent, layerId) {
+    if (!isVisibilityEventEnabled()) {
+      return;
+    }
+
+    const currentVisibility = !visibilityChangeEvent.oldValue;
+    console.log(layerId, 'visibility:', currentVisibility, new Date());
+
+    if (!_switchOuterLayersTimeout) {
+      _memorySwitch = { layerId, currentVisibility};
+
+      _switchOuterLayersTimeout = setTimeout( () => {
+        console.log("why you no show stuff");
+        caseRightAndLeftShowSameLayer(_memorySwitch.layerId, _memorySwitch.currentVisibility);
+        _memorySwitch = null;
+        _switchOuterLayersTimeout = null;
+      }, 500);
+    } else {
+      clearTimeout(_switchOuterLayersTimeout);
+      console.log("clearTimeout");
+      caseRightChangesLayer(_memorySwitch.layerId, _memorySwitch.currentVisibility,
+                            layerId, currentVisibility);
+      _memorySwitch = null;
+      _switchOuterLayersTimeout = null;
+    }
+  }
+
   function getSwiperLayers(layers) {
     layers.forEach(la => {
-      _layers[la.get('id')] = new SwiperLayer(la, false, false);
+      const layerId = la.get('id');
+      _layers[layerId] = new SwiperLayer(la, false, false);
+      //setup listener 
+      la.on('change:visible', (visibilityChangeEvent) => {
+        doesChangeAffectLayerVisibility_2(visibilityChangeEvent, layerId);
+      });
     });
     return _layers;
   }
