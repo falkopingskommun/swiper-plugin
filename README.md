@@ -1,6 +1,6 @@
 # swiper
 
-## To start project
+## To use the plugin
 
 In the Origo project index.html import swiper component
 Declare circleRadius to the size of the circle layer.
@@ -33,6 +33,15 @@ you wish the swiper plugin have access to show in the second view.
     "isSwiperLayer": true
 },
 ```
+
+## Swiper settings
+
+- `circleRadius`: used for the Clip (circle) plugin, the default is 50 (meters)
+- `tooltips`: object which contains the tooltip text for the existing buttons
+  - `swiper`: the main button to show the overlay options
+  - `swipeBetweenLayers`: enables the split screen
+  - `circleSwipe`: shows the circle overlay option, toggles between the two effects
+  - `layerList`: shows the list of swiper enabled layers
 
 ## Plugins used:
 

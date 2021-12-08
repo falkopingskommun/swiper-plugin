@@ -101,7 +101,6 @@ const addStyle = () => {
     }`);
 
   document.styleSheets[document.styleSheets.length - 1].insertRule(`
-  @media only screen and (max-width: 1024px) {
    .o-map .ol-viewport .ol-unselectable button:after {
     content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5L105 105M5 105L105 5" stroke="rgb(74, 74, 74)" stroke-width="10" stroke-linecap="round"/></svg>');
     }`);
@@ -117,7 +116,7 @@ const SwiperLegend = function SwiperLegend(options = {
   // let viewer;
   // let map;
   let target;
-  let isVisible = false;
+  let isShown = false;
   let touchMode;
 
   //Plugin specific
@@ -125,9 +124,13 @@ const SwiperLegend = function SwiperLegend(options = {
   let headerContainerEl;
   let contentContainerEl;
 
+  function isVisible() {
+    return isShown;
+  }
+
   function setSwiperLegendVisible(state) {
-    isVisible = state;
-    if (isVisible) {
+    isShown = state;
+    if (isShown) {
       legendLayerContainer.classList.remove('hidden');
     } else {
       legendLayerContainer.classList.add('hidden');
@@ -252,7 +255,8 @@ const SwiperLegend = function SwiperLegend(options = {
       this.dispatch('render');
     },
     setSwiperLegendVisible,
-    resetLayerList
+    resetLayerList,
+    isVisible
   });
 };
 
