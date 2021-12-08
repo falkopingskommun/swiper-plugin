@@ -12,6 +12,7 @@ module.exports = merge(common, {
     library: "Swiper",
   },
   mode: "development",
+  devtool: 'source-map',
   module: {
     rules: [
       {
