@@ -12,7 +12,7 @@ const Swiper = function Swiper({ circleRadius = 50,
                                    circleSwipe: 'Circle layer overlay',
                                    layerList: 'Layer list'
                                   }
-                                }) {
+                                } = {}) {
   let viewer;
   let map;
   let target;
@@ -35,10 +35,10 @@ const Swiper = function Swiper({ circleRadius = 50,
 
   // tool options
   let circleRadiusOption = circleRadius;
-  const swiperTooltip = tooltips?.swiper || 'Swipe';
-  const swipeBetweenLayersTooltip = tooltips?.swipeBetweenLayers || 'Split view';
-  const circleSwipeTooltip = tooltips?.circleSwipe || 'Circle layer overlay';
-  const layerListTooltip = tooltips?.layerList || 'Layer list';
+  const swiperTooltip = tooltips.swiper;
+  const swipeBetweenLayersTooltip = tooltips.swipeBetweenLayers;
+  const circleSwipeTooltip = tooltips.circleSwipe;
+  const layerListTooltip = tooltips.layerList;
 
   // tool buttons
   let swiperMainButton;
@@ -227,38 +227,54 @@ const Swiper = function Swiper({ circleRadius = 50,
   }
 
   function caseRightAndLeftShowSameLayer(currentLayerId, currentVisibility) {
+    /*
     if (!_swLayers[currentLayerId]) {
       console.log("layer", currentLayerId, 'is not handled by plugin => skip it');
       return;
     }
+    */
     
     // set hidden layer as notShown
-    _swLayers[currentLayerId].setAsShown(false);
+    if (_swLayers[currentLayerId]) {
+      _swLayers[currentLayerId].setAsShown(false);
+    }
 
     // Get the visible layer
     const keys = Object.keys(_swLayers);
     const keyInUse = keys.find((key) => key != currentLayerId && _swLayers[key].inUse());
     console.log('layer in use:', keyInUse);
     const swRightLayer = _swLayers[keyInUse];
+    const theRightLayer = swRightLayer.getLayer();
 
     // get the right layer (if it is a swiperLayer) or first unused layer
-    const newLeftKey = keys.find((key) => key == currentLayerId ||
+    let newLeftKey = keys.find((key) => key == currentLayerId ||
                                       (key != keyInUse && !_swLayers[key].inUse()));
+    if (!newLeftKey) {
+      // there is no other layer to pick => making right and left the same
+      console.log("there is no other layer to pick => disabling tool");
+      disableCircle();
+      disableSwiper();
+      
+      disableVisibilityEvent();
+      theRightLayer.setVisible(false);
+      theRightLayer.setVisible(true);
+      enableVisibilityEvent();
+      return;
+    }
     console.log("change left layer to:", newLeftKey);
     resetSwiperLayer(newLeftKey);
     console.log("left layer shown:", newLeftKey);
     
     disableVisibilityEvent();
     swRightLayer.setAsShownOnRight(true);
-    const theLayer = swRightLayer.getLayer();
     if (swiperControl) {
-      swiperControl.addLayer(theLayer, true);
+      swiperControl.addLayer(theRightLayer, true);
     } else if (circleControl) {
       disableCircle();
       enableCircle();
     }
-    theLayer.setVisible(true);
-    _visibleRightLayer = theLayer;
+    theRightLayer.setVisible(true);
+    _visibleRightLayer = theRightLayer;
     enableVisibilityEvent();
 
     /*
@@ -306,7 +322,7 @@ const Swiper = function Swiper({ circleRadius = 50,
         caseRightAndLeftShowSameLayer(_memorySwitch.layerId, _memorySwitch.currentVisibility);
         _memorySwitch = null;
         _switchOuterLayersTimeout = null;
-      }, 500);
+      }, 100);
     } else {
       clearTimeout(_switchOuterLayersTimeout);
       console.log("clearTimeout");
