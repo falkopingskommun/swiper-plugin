@@ -5,3 +5,102 @@ button {
 button.icon-smaller.no-round-icon .icon > * {
   border-radius: 0;
 }
+
+.legend-layer-container {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 0 8px #888;
+  font-size: 12px;
+  font-weight: normal;
+  position: absolute;
+  left: 100px;
+  top: 20px;
+  max-width: 300px;
+  z-index: 1;
+  cursor: move;
+  opacity: 0.9;
+}
+
+.legend-layer-header {
+  margin: 10px 0 5px 0;
+  padding: 0;
+  font-weight: bold;
+  text-align: center;
+  font-size: 14px;
+}
+
+.legend-close-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-radius: 50%;
+  fill: #4a4a4a;
+  background-color: #eeeeee;
+  content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5L105 105M5 105L105 5" stroke="rgb(74, 74, 74)" stroke-width="20" stroke-linecap="round"/></svg>');
+  opacity: 0.9;
+  cursor: pointer;
+  margin: 2px;
+  height: 10px;
+  padding: 10px;
+}
+
+.legend-list {
+  display: block;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: default;
+  border-radius: 5px;
+}
+
+.legend-list-item {
+  display: flex;
+  margin: 0 !important;
+  padding: 10px 15px !important;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.legend-list-item:hover {
+  background-color: #eeeeee;
+}
+
+.legend-list-item:last-child:hover {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.o-map .ol-control {
+  position: absolute;
+  bottom: 30px;
+}
+
+div.ol-swipe.ol-unselectable.ol-control button {
+  background-color: #eeeeee;
+  cursor: move;
+  opacity: 0.5;
+}
+
+@media only screen and (max-width: 1024px) {
+  .o-map .ol-viewport .ol-unselectable {
+    box-shadow: none;
+    position: relative;
+  }
+}
+
+@media only screen and (max-width: 1024px) {
+  .o-map .ol-viewport .ol-unselectable button {
+    position: absolute;
+    right: 0;
+    fill: #4a4a4a;
+    opacity: 0.9;
+    cursor: pointer;
+    height: 2em;
+    width: 2em;
+    padding: 5px;
+    font-size: inherit;
+  }
+}
+
+.o-map .ol-viewport .ol-unselectable button:after {
+  content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5L105 105M5 105L105 5" stroke="rgb(74, 74, 74)" stroke-width="10" stroke-linecap="round"/></svg>');
+}
