@@ -6,6 +6,10 @@ In the Origo project index.html import swiper component
 Declare circleRadius to the size of the circle layer.
 
 ```html
+<!--Add in header-->
+<link href="plugins/swiper.css" rel="stylesheet" />
+
+<!--Add in body-->
 <script src="plugins/swiper.js"></script>
 <script type="text/javascript">
   const origo = Origo('index.json');
