@@ -55,12 +55,14 @@ const Swiper = function Swiper({ circleRadius = 50,
   let swiperLegendButtonEl;
 
   function showMenuButtons() {
+    swiperMainButtonEl.classList.add('active');
     swiperButtonEl.classList.remove('hidden');
     circleButtonEl.classList.remove('hidden');
     swiperLegendButtonEl.classList.remove('hidden');
   }
 
   function hideMenuButtons() {
+    swiperMainButtonEl.classList.remove('active');
     swiperButtonEl.classList.add('hidden');
     circleButtonEl.classList.add('hidden');
     swiperLegendButtonEl.classList.add('hidden');
@@ -187,10 +189,20 @@ const Swiper = function Swiper({ circleRadius = 50,
   }
 
   function setSwiperVisible(state) {
+    if (state) {
+      swiperButtonEl.classList.add('active');
+    } else {
+      swiperButtonEl.classList.remove('active');
+    }
     isSwiperVisible = state;
   }
 
   function setCircleVisible(state) {
+    if (state) {
+      circleButtonEl.classList.add('active');
+    } else {
+      circleButtonEl.classList.remove('active');
+    }
     isCircleVisible = state;
   }
 
