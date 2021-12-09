@@ -4,8 +4,6 @@ const SwiperLegend = function SwiperLegend(options = {
       showLayer: () =>{console.log('showLayer not defined')}
     }) {
   //Basics
-  // let viewer;
-  // let map;
   let target;
   let isShown = false;
   let touchMode;

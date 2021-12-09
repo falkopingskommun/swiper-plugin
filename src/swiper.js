@@ -96,7 +96,6 @@ const Swiper = function Swiper({ circleRadius = 50,
       });
     } else {
       isNew = false;
-      console.log("there is a swiper control already");
     }
 
     map.addControl(swiperControl);
@@ -112,7 +111,6 @@ const Swiper = function Swiper({ circleRadius = 50,
       showLayerOnController(swiperControl, _visibleLeftLayer);
     }
     setSwiperVisible(true);
-    console.log("adding swiper to the control");
 
     swiperLegend.resetLayerList(_swLayers);
   }
@@ -128,7 +126,6 @@ const Swiper = function Swiper({ circleRadius = 50,
     }
     map.addInteraction(circleControl);
     setCircleVisible(true);
-    console.info('enabling circle');
     
     swiperLegend.resetLayerList(_swLayers);
   }
@@ -239,13 +236,6 @@ const Swiper = function Swiper({ circleRadius = 50,
   }
 
   function caseRightAndLeftShowSameLayer(currentLayerId, currentVisibility) {
-    /*
-    if (!_swLayers[currentLayerId]) {
-      console.log("layer", currentLayerId, 'is not handled by plugin => skip it');
-      return;
-    }
-    */
-    
     // set hidden layer as notShown
     if (_swLayers[currentLayerId]) {
       _swLayers[currentLayerId].setAsShown(false);
@@ -288,16 +278,6 @@ const Swiper = function Swiper({ circleRadius = 50,
     theRightLayer.setVisible(true);
     _visibleRightLayer = theRightLayer;
     enableVisibilityEvent();
-
-    /*
-    console.log("layer to the right:", keyInUse);
-    console.info('left', currentLayerId, _layers[currentLayerId].inUse(), _layers[currentLayerId].right, _layers[currentLayerId].left);
-    console.info('right', keyInUse, _layers[keyInUse].inUse(), _layers[keyInUse].right, _layers[keyInUse].left);
-    const leftLayer = viewer.getLayer(_layers[currentLayerId].getName());
-    const rightLayer = viewer.getLayer(_layers[keyInUse].getName());
-    console.info('viewer-left', currentLayerId, leftLayer.get('visible'));
-    console.info('viewer-right', keyInUse, rightLayer.get('visible'));
-    */
 
     swiperLegend.resetLayerList(_swLayers);
   }
