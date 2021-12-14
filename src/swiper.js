@@ -6,6 +6,7 @@ import SwiperLegend from './swiperLegend';
 import { checkIsMobile } from './functions';
 
 const Swiper = function Swiper({ circleRadius = 50,
+                                 backgroundGroup = 'background',
                                  tooltips = {
                                    swiper: 'Swiper',
                                    swipeBetweenLayers: 'Split view',
@@ -34,7 +35,8 @@ const Swiper = function Swiper({ circleRadius = 50,
   let otherLayers; // this are other layers
 
   // tool options
-  let circleRadiusOption = circleRadius;
+  const circleRadiusOption = circleRadius;
+  const backgroundGroupName = backgroundGroup;
   const swiperTooltip = tooltips.swiper;
   const swipeBetweenLayersTooltip = tooltips.swipeBetweenLayers;
   const circleSwipeTooltip = tooltips.circleSwipe;
@@ -235,10 +237,48 @@ const Swiper = function Swiper({ circleRadius = 50,
     return true;
   }
 
+  function areSwiperLayersCompromised(layerId, layerVisibility) {
+    if (layerVisibility) { // turning on another layer, that is fine
+      return false;
+    }
+    const givenLayers = viewer.getLayersByProperty('id', layerId);
+    if (!givenLayers.length) {
+      return false;
+    }
+    // if not a background layer => fine
+    const backgroundGroup = backgroundGroupName;
+    const layerGroup = givenLayers[0].get('group');
+    if (layerGroup != backgroundGroup) {
+      console.log('not background group')
+      return false;
+    }
+
+    // turning off a layer, does that affect us?
+    const keys = Object.keys(_swLayers);
+    const layersInUse = keys.filter((key) => _swLayers[key].inUse());
+    // if we have 2 on layers => we are good
+    if (layersInUse.length == 2) {
+      return false;
+    }
+    // ok, so we do not see all layers => lets see if there are at least 2 background layers on
+    const visibleBackgroundLayers = viewer.getLayersByProperty('group', backgroundGroup);
+    if (visibleBackgroundLayers.length == 2) {
+      return false;
+    }
+
+    return true;
+  }
+
   function caseRightAndLeftShowSameLayer(currentLayerId, currentVisibility) {
     // set hidden layer as notShown
     if (_swLayers[currentLayerId]) {
       _swLayers[currentLayerId].setAsShown(false);
+    } else {
+      console.log("layer triggered but in a SwiperLayer", currentLayerId, currentVisibility);
+      if (!areSwiperLayersCompromised(currentLayerId, currentVisibility)) {
+        console.log('it does not compromise the existing swiper layers')
+        return;
+      }
     }
 
     // Get the visible layer

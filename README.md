@@ -41,6 +41,7 @@ you wish the swiper plugin have access to show in the second view.
 ## Swiper settings
 
 - `circleRadius`: used for the Clip (circle) plugin, the default is 50 (meters)
+- `backgroundGroup`: name of the background group layers, the default 'background'. Needed when handing edge cases such as when the user is trying to show the same layer on both sides
 - `tooltips`: object which contains the tooltip text for the existing buttons
   - `swiper`: the main button to show the overlay options
   - `swipeBetweenLayers`: enables the split screen
