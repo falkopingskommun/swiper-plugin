@@ -6,6 +6,8 @@ import SwiperLegend from './swiperLegend';
 import { checkIsMobile } from './functions';
 
 const Swiper = function Swiper({ circleRadius = 50,
+                                 initialLayer = null,
+                                 initialControl = null,
                                  backgroundGroup = 'background',
                                  tooltips = {
                                    swiper: 'Swiper',
@@ -23,7 +25,7 @@ const Swiper = function Swiper({ circleRadius = 50,
   let _swLayers = {};
   let _switchingLayers = false;
   let _lastZIndex = 0;
-  const defaultZIndex = 6;
+  const defaultZIndex = 1;
 
   let buttonsContainer;
   let swiperControl;
@@ -38,6 +40,8 @@ const Swiper = function Swiper({ circleRadius = 50,
 
   // tool options
   const circleRadiusOption = circleRadius;
+  const defaultLayer = initialLayer || '';
+  const defaultControl = initialControl;
   const backgroundGroupName = backgroundGroup;
   const swiperTooltip = tooltips.swiper;
   const swipeBetweenLayersTooltip = tooltips.swipeBetweenLayers;
@@ -363,6 +367,12 @@ const Swiper = function Swiper({ circleRadius = 50,
     layers.forEach(la => {
       const layerId = la.get('id');
       _swLayers[layerId] = new SwiperLayer(la, false, false);
+
+      // setting the default layer
+      if (la.get('name').toLowerCase() === defaultLayer.toLowerCase()) {
+        console.log('default layer set:', defaultLayer);
+        _visibleLeftLayer = la;
+      }
     });
     return _swLayers;
   }
@@ -423,6 +433,15 @@ const Swiper = function Swiper({ circleRadius = 50,
           } else {
             bindLayersListener();
             showMenuButtons();
+            if (defaultControl) {
+              const controlName = defaultControl.toLowerCase();
+              if (controlName === 'swipe') {
+                enableSwiper();
+              }
+              if (controlName === 'clip') {
+                enableCircle();
+              }
+            }
           }
           isSwiperToolsOpen = !isSwiperToolsOpen;
         },
