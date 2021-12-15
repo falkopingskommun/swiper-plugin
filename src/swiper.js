@@ -22,6 +22,8 @@ const Swiper = function Swiper({ circleRadius = 50,
   let _visibleRightLayer;
   let _swLayers = {};
   let _switchingLayers = false;
+  let _lastZIndex = 0;
+  const defaultZIndex = 6;
 
   let buttonsContainer;
   let swiperControl;
@@ -118,14 +120,17 @@ const Swiper = function Swiper({ circleRadius = 50,
   }
 
   function enableCircle() {
-    if (!circleControl) {
+    // if (!circleControl) {
       findLayerToSwipe();
       console.log('cirle - layer', _visibleLeftLayer.get('name'))
       circleControl = new ol_interaction_Clip({
-        radius: circleRadiusOption || 100,
+        radius: circleRadiusOption || 100
       });
       showLayerOnController(circleControl, _visibleLeftLayer);
-    }
+      _lastZIndex = _visibleLeftLayer.getZIndex();
+      console.log('zIndex', _lastZIndex);
+      _visibleLeftLayer.setZIndex(defaultZIndex);
+    // }
     map.addInteraction(circleControl);
     setCircleVisible(true);
     
@@ -174,6 +179,8 @@ const Swiper = function Swiper({ circleRadius = 50,
     setCircleVisible(false);
     showLayerOnController(circleControl, _visibleLeftLayer, false);
     circleControl = null;
+    _visibleLeftLayer.setZIndex(_lastZIndex);
+    _lastZIndex = undefined;
     console.info('disabling circle');
   }
 
@@ -214,6 +221,7 @@ const Swiper = function Swiper({ circleRadius = 50,
   function resetSwiperLayer(layerId) {
     // remove old layer
     let oldLayer = _visibleLeftLayer;
+    const oldZIndex = _lastZIndex;
   
     if (_swLayers[layerId].inUse()) {
       console.log('the layer ', layerId, 'is in use');
@@ -224,6 +232,13 @@ const Swiper = function Swiper({ circleRadius = 50,
     _visibleLeftLayer = toBeSwiperLayer;
     console.log('new left side - layer:', _swLayers[layerId].getName());
     
+    if (circleControl) {
+      // reset the zIndex is only needed for the circle controller
+      oldLayer.setZIndex(oldZIndex);
+      _lastZIndex = _visibleLeftLayer.getZIndex();
+      _visibleLeftLayer.setZIndex(defaultZIndex);
+    }
+
     // add new layer
     const selectedControl = swiperControl || circleControl;
     showLayerOnController(selectedControl, _visibleLeftLayer);

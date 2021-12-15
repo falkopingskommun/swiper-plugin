@@ -15,7 +15,7 @@ Declare circleRadius to the size of the circle layer.
   const origo = Origo('index.json');
   origo.on('load', function (viewer) {
     const swiper = Swiper({ circleRadius: 100 });
-    origo.addComponent(swiper);
+    viewer.addComponent(swiper);
   });
 </script>
 ```
