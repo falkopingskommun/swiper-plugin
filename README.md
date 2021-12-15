@@ -48,6 +48,10 @@ you wish the swiper plugin have access to show in the second view.
   - `circleSwipe`: shows the circle overlay option, toggles between the two effects
   - `layerList`: shows the list of swiper enabled layers
 
+## Limitations
+
+The Swiper tools (the clip and the swipe) do not support showing the same layer as the already visible layer. In the case the user selects the same layer, the tool will close and simply show the visible layers.
+
 ## Plugins used:
 
 1. [ol-ext/interaction/Clip](http://viglino.github.io/ol-ext/examples/interaction/map.interaction.clip.html). This is to show a circle and a different map layer in it.

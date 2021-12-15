@@ -303,38 +303,17 @@ const Swiper = function Swiper({ circleRadius = 50,
     const swRightLayer = _swLayers[keyInUse];
     const theRightLayer = swRightLayer.getLayer();
 
-    // get the right layer (if it is a swiperLayer) or first unused layer
-    let newLeftKey = keys.find((key) => key == currentLayerId ||
-                                      (key != keyInUse && !_swLayers[key].inUse()));
-    if (!newLeftKey) {
-      // there is no other layer to pick => making right and left the same
-      console.log("there is no other layer to pick => disabling tool");
-      disableCircle();
-      disableSwiper();
-      
-      disableVisibilityEvent();
-      theRightLayer.setVisible(false);
-      theRightLayer.setVisible(true);
-      enableVisibilityEvent();
-      return;
-    }
-    console.log("change left layer to:", newLeftKey);
-    resetSwiperLayer(newLeftKey);
-    console.log("left layer shown:", newLeftKey);
+    // no magic => disable controllers
+    disableCircle();
+    disableSwiper();
     
     disableVisibilityEvent();
-    swRightLayer.setAsShownOnRight(true);
-    if (swiperControl) {
-      swiperControl.addLayer(theRightLayer, true);
-    } else if (circleControl) {
-      disableCircle();
-      enableCircle();
-    }
+    theRightLayer.setVisible(false);
     theRightLayer.setVisible(true);
-    _visibleRightLayer = theRightLayer;
     enableVisibilityEvent();
 
     swiperLegend.resetLayerList(_swLayers);
+    return;
   }
 
   function caseRightChangesLayer(layerId1, visibility1,
