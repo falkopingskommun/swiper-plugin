@@ -50,6 +50,9 @@ button.icon-smaller.no-round-icon .icon > * {
   margin: 0 !important;
   cursor: default;
   border-radius: 5px;
+
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .legend-list-item {
