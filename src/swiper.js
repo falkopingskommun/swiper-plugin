@@ -5,15 +5,16 @@ import SwiperLayer from './swiperLayer';
 import SwiperLegend from './swiperLegend';
 import { checkIsMobile } from './functions';
 
-const Swiper = function Swiper({ circleRadius = 50,
-                                 initialLayer = null,
-                                 initialControl = null,
-                                 backgroundGroup = 'background',
-                                 tooltips = {
-                                   swiper: 'Swiper',
-                                   swipeBetweenLayers: 'Split view',
-                                   circleSwipe: 'Circle layer overlay',
-                                   layerList: 'Layer list'
+const Swiper = function Swiper({  circleRadius = 50,
+                                  circleZIndex = 0,
+                                  initialLayer = null,
+                                  initialControl = null,
+                                  backgroundGroup = 'background',
+                                  tooltips = {
+                                    swiper: 'Swiper',
+                                    swipeBetweenLayers: 'Split view',
+                                    circleSwipe: 'Circle layer overlay',
+                                    layerList: 'Layer list'
                                   }
                                 } = {}) {
   let viewer;
@@ -25,7 +26,7 @@ const Swiper = function Swiper({ circleRadius = 50,
   let _swLayers = {};
   let _switchingLayers = false;
   let _lastZIndex = 0;
-  const defaultZIndex = 1;
+  const defaultZIndex = circleZIndex || 1;
 
   let buttonsContainer;
   let swiperControl;
@@ -315,8 +316,9 @@ const Swiper = function Swiper({ circleRadius = 50,
     theRightLayer.setVisible(false);
     theRightLayer.setVisible(true);
     enableVisibilityEvent();
-
-    swiperLegend.resetLayerList(_swLayers);
+    
+    closeSwiperTool();
+    // swiperLegend.resetLayerList(_swLayers);
     return;
   }
 
@@ -418,18 +420,41 @@ const Swiper = function Swiper({ circleRadius = 50,
     return true;
   }
 
+  function closeSwiperTool() {
+    isSwiperToolsOpen = false;
+    disableCircle();
+    disableSwiper();
+    hideMenuButtons();
+    swiperLegend.setSwiperLegendVisible(false);
+    unBindLayersListener();
+  }
+
+  function addSvgIcons() {
+    const svgIcons = `
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+      <symbol id="fa-code" viewBox="0 0 512 512">
+        <path d="m158 400l-14 14c-2 2-4 3-7 3-2 0-5-1-6-3l-134-133c-1-2-2-4-2-7 0-2 1-4 2-6l134-133c1-2 4-3 6-3 3 0 5 1 7 3l14 14c2 2 3 4 3 6 0 3-1 5-3 7l-112 112 112 113c2 1 3 4 3 6 0 3-1 5-3 7z m169-305l-107 369c0 2-2 4-4 5-2 2-5 2-7 1l-18-5c-2-1-4-2-5-4-1-2-2-5-1-7l107-369c0-3 2-4 4-6 2-1 5-1 7 0l18 4c2 1 4 3 5 5 1 2 2 4 1 7z m188 186l-134 133c-1 2-4 3-6 3-3 0-5-1-7-3l-14-14c-2-2-3-4-3-7 0-2 1-5 3-6l112-113-112-112c-2-2-3-4-3-7 0-2 1-4 3-6l14-14c2-2 4-3 7-3 2 0 5 1 6 3l134 133c1 2 2 4 2 6 0 3-1 5-2 7z"/>
+      </symbol>
+        
+      <symbol id="fa-columns" viewBox="0 0 512 512">
+        <path d="m64 439l174 0 0-329-183 0 0 320c0 2 1 4 3 6 1 2 4 3 6 3z m393-9l0-320-183 0 0 329 174 0c2 0 5-1 6-3 2-2 3-4 3-6z m37-348l0 348c0 12-5 23-14 32-9 9-19 13-32 13l-384 0c-13 0-23-4-32-13-9-9-14-20-14-32l0-348c0-12 5-23 14-32 9-9 19-13 32-13l384 0c13 0 23 4 32 13 9 9 14 20 14 32z"/>
+      </symbol>
+    </svg>
+    `;
+    const div = document.createElement('div');
+    div.innerHTML = svgIcons;
+    document.body.insertBefore(div, document.body.childNodes[0]);
+  }
+
   return Origo.ui.Component({
     name: 'swiper',
     onInit() {
+      addSvgIcons();
       swiperMainButton = Origo.ui.Button({
-        cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow no-round-icon',
+        cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow no-round-icon swiper-tool-button',
         click() {
           if (isSwiperToolsOpen) {
-            disableCircle();
-            disableSwiper();
-            hideMenuButtons();
-            swiperLegend.setSwiperLegendVisible(false);
-            unBindLayersListener();
+            closeSwiperTool();
           } else {
             bindLayersListener();
             showMenuButtons();
@@ -450,13 +475,14 @@ const Swiper = function Swiper({ circleRadius = 50,
         tooltipPlacement: 'east',
       });
       swiperButton = Origo.ui.Button({
-        cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
+        cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden swiper-button',
         click() {
           disableCircle();
           if (!isSwiperVisible) {
             enableSwiper();
           } else {
-            disableSwiper();
+            // do nothing
+            // disableSwiper();
           }
         },
         icon: '#fa-code',
@@ -470,7 +496,8 @@ const Swiper = function Swiper({ circleRadius = 50,
           if (!isCircleVisible) {
             enableCircle();
           } else {
-            disableCircle();
+            // do nothing
+            // disableCircle();
           }
         },
         icon: '#fa-circle-o',
