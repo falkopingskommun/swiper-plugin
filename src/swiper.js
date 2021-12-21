@@ -423,12 +423,12 @@ const Swiper = function Swiper({  circleRadius = 50,
   }
 
   function closeSwiperTool() {
-    isSwiperToolsOpen = false;
     disableCircle();
     disableSwiper();
     hideMenuButtons();
     swiperLegend.setSwiperLegendVisible(false);
     unBindLayersListener();
+    isSwiperToolsOpen = false;
   }
 
   function addSvgIcons() {
@@ -469,8 +469,8 @@ const Swiper = function Swiper({  circleRadius = 50,
                 enableCircle();
               }
             }
+            isSwiperToolsOpen = true;
           }
-          isSwiperToolsOpen = !isSwiperToolsOpen;
         },
         icon: '#fa-columns',
         tooltipText: swiperTooltip,
