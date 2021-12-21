@@ -22,6 +22,10 @@ export default class SwiperLayer {
         return this.left;
     }
 
+    inRightSideUse() {
+        return this.right;
+    }
+
     setAsShown(visibleLeft = true) {
         this.left = visibleLeft;
         this.right = false;

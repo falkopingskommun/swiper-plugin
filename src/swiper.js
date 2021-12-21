@@ -291,16 +291,37 @@ const Swiper = function Swiper({  circleRadius = 50,
     return true;
   }
 
+  function anyRightLayerLeft() {
+    const keys = Object.keys(_swLayers);
+    const layerInUse = keys.find((key) => _swLayers[key].inRightSideUse());
+    return layerInUse != null;
+  }
+
   function caseRightAndLeftShowSameLayer(currentLayerId, currentVisibility) {
     // set hidden layer as notShown
-    if (_swLayers[currentLayerId]) {
-      _swLayers[currentLayerId].setAsShown(false);
+    const currentSwLayer = _swLayers[currentLayerId];
+    if (currentSwLayer && !currentVisibility) {
+      currentSwLayer.setAsShown(false);
+      if (anyRightLayerLeft()) {
+        return;
+      }
+      // else panic
     } else {
       console.log("layer triggered but in a SwiperLayer", currentLayerId, currentVisibility);
       if (!areSwiperLayersCompromised(currentLayerId, currentVisibility)) {
         console.log('it does not compromise the existing swiper layers')
+        if (currentSwLayer) {
+          if (currentVisibility) {
+            currentSwLayer.setAsShownOnRight(true);
+            swiperControl.addLayer(currentSwLayer.getLayer(), true);
+          } else {
+            currentSwLayer.setAsShownOnRight(false);
+            swiperControl.removeLayer(currentSwLayer.getLayer());
+          }
+        }
         return;
       }
+      // else panic
     }
 
     // Get the visible layer
@@ -330,9 +351,23 @@ const Swiper = function Swiper({  circleRadius = 50,
     // just update the visibility on the _layers
     if (_swLayers[layerId1]) {
       _swLayers[layerId1].setAsShownOnRight(visibility1);
+      if (swiperControl) {
+        if (visibility1) {
+          swiperControl.addLayer(_swLayers[layerId1].getLayer(), true);
+        } else {
+          swiperControl.removeLayer(_swLayers[layerId1].getLayer());
+        }
+      }
     }
     if (_swLayers[layerId2]) {
       _swLayers[layerId2].setAsShownOnRight(visibility2);
+      if (swiperControl) {
+        if (visibility2) {
+          swiperControl.addLayer(_swLayers[layerId2].getLayer(), true);
+        } else {
+          swiperControl.removeLayer(_swLayers[layerId2].getLayer());
+        }
+      }
     }
     swiperLegend.resetLayerList(_swLayers);
   }
