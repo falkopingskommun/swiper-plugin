@@ -81,11 +81,13 @@ const Swiper = function Swiper({  circleRadius = 50,
     const keys = Object.keys(_swLayers);
     
     // setting right layer
-    let visibleRightKey = keys.find(lk => _swLayers[lk].getLayer().get('visible'));
-    if (visibleRightKey) {
-      _visibleRightLayer = _swLayers[visibleRightKey].getLayer();
-      _swLayers[visibleRightKey].setAsShownOnRight();
-      console.log('right layer', _visibleRightLayer.get('name'))
+    let visibleRightKeys = keys.filter(lk => _swLayers[lk].getLayer().get('visible'));
+    if (visibleRightKeys.length > 0) {
+      visibleRightKeys.forEach(visibleRightKey => {
+        _visibleRightLayer = _swLayers[visibleRightKey].getLayer();
+        _swLayers[visibleRightKey].setAsShownOnRight();
+        console.log('right layer', _visibleRightLayer.get('name'))
+      });
     }
 
     // setting left layer ... if old layer is in use => get a new one
