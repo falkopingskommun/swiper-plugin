@@ -378,7 +378,7 @@ const Swiper = function Swiper({  circleRadius = 50,
   }
 
   let _switchOuterLayersTimeout = null;
-  let _memorySwitch = null;
+  let _memorySwitch = [];
   function doesChangeAffectLayerVisibility(visibilityChangeEvent) {
     if (!isVisibilityEventEnabled()) {
       return;
@@ -386,27 +386,60 @@ const Swiper = function Swiper({  circleRadius = 50,
 
     const layerId = visibilityChangeEvent.target.get('id');
     const currentVisibility = !visibilityChangeEvent.oldValue;
-    console.log(layerId, 'visibility:', currentVisibility, new Date(), visibilityChangeEvent);
+    console.log(layerId, 'visibility:', currentVisibility, new Date());
+    _memorySwitch.push({ layerId, currentVisibility});
 
-    if (!_switchOuterLayersTimeout) {
-      _memorySwitch = { layerId, currentVisibility};
-
-      _switchOuterLayersTimeout = setTimeout( () => {
-        console.log("why you no show stuff");
-        caseRightAndLeftShowSameLayer(_memorySwitch.layerId, _memorySwitch.currentVisibility);
-        _memorySwitch = null;
-        _switchOuterLayersTimeout = null;
-      }, 100);
-    } else {
+    if (_switchOuterLayersTimeout) {
       clearTimeout(_switchOuterLayersTimeout);
-      console.log("clearTimeout");
-      caseRightChangesLayer(_memorySwitch.layerId, _memorySwitch.currentVisibility,
-                            layerId, currentVisibility);
-      _memorySwitch = null;
-      _switchOuterLayersTimeout = null;
     }
+    _switchOuterLayersTimeout = setTimeout( () => {
+      console.log("got all", _memorySwitch.length, 'changes');
+      whatTodoWithTheseVisibilityChanges(_memorySwitch);
+      _memorySwitch = [];
+      _switchOuterLayersTimeout = null;
+    }, 100);
   }
-
+  function whatTodoWithTheseVisibilityChanges(affectedVisibleLayers) {
+    if (!affectedVisibleLayers || !affectedVisibleLayers.length) {
+      log.console('why is the affectedVisibleLayers array empty?')
+      return;
+    }
+    if (affectedVisibleLayers.length == 1) {
+      const affected = affectedVisibleLayers.pop();
+        caseRightAndLeftShowSameLayer(affected.layerId, affected.currentVisibility);
+        return;
+    }
+    // 2 or more
+    const firstValue = affectedVisibleLayers[0].currentVisibility;
+    const accumulativeValue = affectedVisibleLayers.reduce((curr, accum) => {
+      if (firstValue) {
+        return curr && accum;
+      } else {
+        return curr || accum;
+      }
+    }, firstValue);
+    // if they are all the same => they come from a group, so treat each one 
+    // as if it was called individually 
+    if (firstValue == accumulativeValue) {
+      affectedVisibleLayers.forEach(mem => {
+        caseRightAndLeftShowSameLayer(mem.layerId, mem.currentVisibility);
+      });
+    }
+    // else 
+    if (affectedVisibleLayers.length == 2) {
+      var mem1 = affectedVisibleLayers.pop();
+      var mem2 = affectedVisibleLayers.pop();
+      caseRightChangesLayer(mem1.layerId, mem1.currentVisibility,
+                            mem2.layerId, mem2.currentVisibility);
+    }
+    // if there is more than 2 and some are on and some off, then this is a strange situation 
+    // which this plugin is not prepared to handled.
+    // The least damaging thing is to handle it as if they are individual calls
+    affectedVisibleLayers.forEach(mem => {
+      caseRightAndLeftShowSameLayer(mem.layerId, mem.currentVisibility);
+    });
+  }
+  
   function setSwiperLayers(layers) {
     layers.forEach(la => {
       const layerId = la.get('id');
@@ -536,15 +569,15 @@ const Swiper = function Swiper({  circleRadius = 50,
         circleButton = Origo.ui.Button({
           cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
           click() {
-          disableSwiper();
-          if (!isCircleVisible) {
-            enableCircle();
-          } else {
-            // do nothing
-            // disableCircle();
-          }
-        },
-        icon: '#fa-circle-o',
+            disableSwiper();
+            if (!isCircleVisible) {
+              enableCircle();
+            } else {
+              // do nothing
+              // disableCircle();
+            }
+          },
+          icon: '#fa-circle-o',
           tooltipText: circleSwipeTooltip,
           tooltipPlacement: 'east',
         });
