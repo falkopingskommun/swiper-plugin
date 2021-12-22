@@ -21,6 +21,7 @@ const Swiper = function Swiper({  circleRadius = 50,
   let map;
   let target;
   let touchMode;
+  let _isMobile;
   let _visibleLeftLayer;
   let _visibleRightLayer;
   let _swLayers = {};
@@ -66,14 +67,18 @@ const Swiper = function Swiper({  circleRadius = 50,
   function showMenuButtons() {
     swiperMainButtonEl.classList.add('active');
     swiperButtonEl.classList.remove('hidden');
-    circleButtonEl.classList.remove('hidden');
+    if (!_isMobile) {
+      circleButtonEl.classList.remove('hidden');
+    }
     swiperLegendButtonEl.classList.remove('hidden');
   }
 
   function hideMenuButtons() {
     swiperMainButtonEl.classList.remove('active');
     swiperButtonEl.classList.add('hidden');
-    circleButtonEl.classList.add('hidden');
+    if (!_isMobile) {
+      circleButtonEl.classList.add('hidden');
+    }
     swiperLegendButtonEl.classList.add('hidden');
   }
 
@@ -103,7 +108,7 @@ const Swiper = function Swiper({  circleRadius = 50,
     let isNew = true;
     if (!swiperControl) {
       swiperControl = new ol_control_Swipe({
-        orientation: checkIsMobile() ? 'horizontal' : 'vertical',
+        orientation: _isMobile ? 'horizontal' : 'vertical',
       });
     } else {
       isNew = false;
@@ -486,6 +491,7 @@ const Swiper = function Swiper({  circleRadius = 50,
   return Origo.ui.Component({
     name: 'swiper',
     onInit() {
+      _isMobile = checkIsMobile();
       addSvgIcons();
       swiperMainButton = Origo.ui.Button({
         cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow no-round-icon swiper-tool-button',
@@ -526,9 +532,10 @@ const Swiper = function Swiper({  circleRadius = 50,
         tooltipText: swipeBetweenLayersTooltip,
         tooltipPlacement: 'east',
       });
-      circleButton = Origo.ui.Button({
-        cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
-        click() {
+      if (!_isMobile) {
+        circleButton = Origo.ui.Button({
+          cls: 'o-measure padding-small margin-bottom-smaller icon-smaller round light box-shadow hidden',
+          click() {
           disableSwiper();
           if (!isCircleVisible) {
             enableCircle();
@@ -538,9 +545,10 @@ const Swiper = function Swiper({  circleRadius = 50,
           }
         },
         icon: '#fa-circle-o',
-        tooltipText: circleSwipeTooltip,
-        tooltipPlacement: 'east',
-      });
+          tooltipText: circleSwipeTooltip,
+          tooltipPlacement: 'east',
+        });
+      }
 
       swiperLegend = SwiperLegend({showLayer: resetSwiperLayer});
 
@@ -582,7 +590,12 @@ const Swiper = function Swiper({  circleRadius = 50,
 
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getMapTools().getId()}`;
-      this.addComponents([swiperMainButton, swiperButton, circleButton, swiperLegendButton]);
+      let components = [swiperMainButton, swiperButton];
+      if (!_isMobile) {
+        components.push(circleButton);
+      }
+      components.push(swiperLegendButton);
+      this.addComponents(components);
       viewer.addComponent(swiperLegend);
       this.render();
     },
@@ -602,10 +615,12 @@ const Swiper = function Swiper({  circleRadius = 50,
       buttonsContainerEl.appendChild(swiperButtonHtmlFragment);
       swiperButtonEl = document.getElementById(swiperButton.getId());
 
-      // Adding Circle toogle button
-      const modeButtonHtmlFragment = Origo.ui.dom.html(circleButton.render());
-      buttonsContainerEl.appendChild(modeButtonHtmlFragment);
-      circleButtonEl = document.getElementById(circleButton.getId());
+      if (!_isMobile) {
+        // Adding Circle toogle button
+        const modeButtonHtmlFragment = Origo.ui.dom.html(circleButton.render());
+        buttonsContainerEl.appendChild(modeButtonHtmlFragment);
+        circleButtonEl = document.getElementById(circleButton.getId());
+      }
 
       // Adding the layer list button
       const swiperLegendButtonHtmlFragment = Origo.ui.dom.html(swiperLegendButton.render());
