@@ -14,11 +14,11 @@ button.icon-smaller.no-round-icon .icon > * {
   font-weight: normal;
   position: absolute;
   left: 100px;
-  top: 20px;
+  top: 80px;
   max-width: 300px;
   z-index: 1;
   cursor: move;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .legend-layer-header {
@@ -80,7 +80,7 @@ button.icon-smaller.no-round-icon .icon > * {
 }
 
 .ol-swipe.vertical {
-  bottom: 30px;
+  bottom: 65px;
   left: 50%;
 }
 
@@ -95,11 +95,11 @@ button.icon-smaller.no-round-icon .icon > * {
   top: -5000px;
   bottom: -5000px;
   left: 50%;
-  width: 4px;
-  background: #fff;
+  width: 1px;
+  background: #000;
   z-index: -1;
   -webkit-transform: translate(-2px, 0);
-  transform: translate(-2px, 0);
+  transform: translate(-1px, 0);
 }
 .ol-swipe.horizontal:before {
   left: -5000px;
@@ -107,7 +107,7 @@ button.icon-smaller.no-round-icon .icon > * {
   top: 50%;
   bottom: auto;
   width: auto;
-  height: 4px;
+  height: 1px;
 }
 
 .ol-swipe.ol-unselectable.ol-control {
@@ -116,9 +116,9 @@ button.icon-smaller.no-round-icon .icon > * {
 }
 
 div.ol-swipe.ol-unselectable.ol-control button {
-  background-color: darkblue;
+  background-color: #008ff5;
   cursor: move;
-  opacity: 0.75;
+  opacity: 0.9;
   border-radius: 25px;
 }
 
@@ -135,8 +135,8 @@ div.ol-swipe.ol-unselectable.ol-control button {
 .o-map .ol-viewport .ol-unselectable button {
   // position: absolute;
   // right: 0;
-  height: 3em;
-  width: 3em;
+  height: 2.5em;
+  width: 2.5em;
   padding: 5px;
   font-size: inherit;
 }
