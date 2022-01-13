@@ -1,6 +1,7 @@
 const webpack = require("webpack");
 const { merge } = require("webpack-merge");
 const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const common = require("./webpack.common.js");
 
 module.exports = merge(common, {
@@ -54,6 +55,10 @@ module.exports = merge(common, {
       uglifyOptions: {
         output: {
           beautify: false,
+        },
+        compress: {
+          // remove console.logs
+          drop_console: true,
         },
       },
     }),

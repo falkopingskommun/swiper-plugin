@@ -1,122 +1,11 @@
 import Origo from 'Origo';
-import { setOneSwiperLayer } from './swiper';
 
-const addStyle = () => {
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-  .legend-layer-container {
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 0 8px #888;
-    font-size: 12px;
-    font-weight: normal;
-    position: absolute;
-    left: 100px;
-    top: 20px;
-    max-width: 300px;
-    width: 180px;
-    z-index: 1;
-    cursor: move;
-    opacity: 0.9;
-  }`);
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-  .legend-layer-header {
-    margin: 10px 0 5px 0;
-    padding: 0;
-    font-weight: bold;
-    text-align: center;
-    font-size: 14px;
- }`);
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-  .legend-close-button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    border-radius: 50%;
-    fill: #4a4a4a;
-    background-color: #eeeeee;
-    content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5L105 105M5 105L105 5" stroke="rgb(74, 74, 74)" stroke-width="20" stroke-linecap="round"/></svg>');
-    opacity: 0.9;
-    cursor: pointer;
-    margin: 2px;
-    height: 10px;
-    padding: 10px;
- }`);
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-  .legend-list {
-    display: block;
-    padding: 0 !important;
-    margin: 0 !important;
-    cursor: default;
-    border-radius: 5px;
-  }`);
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-   .legend-list-item {
-      display: block;
-      margin: 0 !important;
-      padding: 10px 15px !important;
-      cursor: pointer;
-      text-decoration: underline;
-    }`);
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-     .legend-list-item:hover {
-        background-color: #eeeeee;
-    }`);
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-    .legend-list-item:last-child:hover {
-      border-bottom-left-radius: 5px;
-      border-bottom-right-radius: 5px;
-    }`);
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-    .o-map .ol-control {
-      position: absolute;
-      bottom: 30px;
-    }`);
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-    div.ol-swipe.ol-unselectable.ol-control button {
-      background-color: #eeeeee;
-      cursor: move;
-      opacity: 0.5;
-    }`);
-
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-  @media only screen and (max-width: 1024px) {
-   .o-map .ol-viewport .ol-unselectable {
-      box-shadow: none;
-      position: relative;
-      }
-    }`);
-
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-  @media only screen and (max-width: 1024px) {
-   .o-map .ol-viewport .ol-unselectable button {
-      position: absolute;
-      right: 0;
-      fill: #4a4a4a;
-      opacity: 0.9;
-      cursor: pointer;
-      height: 2em;
-      width: 2em;
-      padding: 5px;
-      font-size: inherit;
-      }
-    }`);
-
-  document.styleSheets[document.styleSheets.length - 1].insertRule(`
-  @media only screen and (max-width: 1024px) {
-   .o-map .ol-viewport .ol-unselectable button:after {
-    content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5L105 105M5 105L105 5" stroke="rgb(74, 74, 74)" stroke-width="10" stroke-linecap="round"/></svg>');
-    }`);
-};
-
-addStyle();
-export let swiperLayersConfig;
-
-const SwiperLegend = function SwiperLegend(options = {}) {
+const SwiperLegend = function SwiperLegend(options = {
+      showLayer: () =>{console.log('showLayer not defined')}
+    }) {
   //Basics
-  let viewer;
-  let map;
   let target;
-  let isVisible = false;
+  let isShown = false;
   let touchMode;
 
   //Plugin specific
@@ -124,9 +13,16 @@ const SwiperLegend = function SwiperLegend(options = {}) {
   let headerContainerEl;
   let contentContainerEl;
 
+  const checkIcon = '#ic_check_circle_24px';
+  const uncheckIcon = '#ic_radio_button_unchecked_24px';
+
+  function isVisible() {
+    return isShown;
+  }
+
   function setSwiperLegendVisible(state) {
-    isVisible = state;
-    if (isVisible) {
+    isShown = state;
+    if (isShown) {
       legendLayerContainer.classList.remove('hidden');
     } else {
       legendLayerContainer.classList.add('hidden');
@@ -180,17 +76,46 @@ const SwiperLegend = function SwiperLegend(options = {}) {
     }
   }
 
-  function renderLayersList() {
-    swiperLayersConfig.forEach(element => {
+  function resetLayerList(swiperLayers) {
+    renderLayersList(swiperLayers);
+  }
+
+  function getCheckIcon(isChecked) {
+    return isChecked 
+      ? checkIcon 
+      : uncheckIcon;
+  }
+
+  function renderLayersList(swiperLayers) {
+    contentContainerEl.textContent = '';
+
+    const keys = Object.keys(swiperLayers);
+    keys.forEach(layerId => {
+      const swLayer = swiperLayers[layerId];
       const legendLayersListItem = document.createElement('li');
-      legendLayersListItem.innerHTML = element.get('title');
-      legendLayersListItem.id = element.get('id');
-      legendLayersListItem.className = 'legend-list-item';
+      legendLayersListItem.id = layerId;
+      legendLayersListItem.className = `legend-list-item ${swLayer.inUse() ? 'disabled' : ''}`;
+      
+      const inSwiperUse = swLayer.inSwiperUse();
+      
+      const iconToShow = Origo.ui.Icon({
+        icon: getCheckIcon(inSwiperUse),
+        cls: `round small icon-smaller no-shrink checked-icon`,
+        style: '',
+        title: '',
+      });
+      const divName = Origo.ui.Element({
+        cls: `text-smaller padding-x-small grow pointer no-select overflow-hidden`,
+        innerHTML: swLayer.getLayer().get('title')
+      });
+      
+      legendLayersListItem.innerHTML = `${divName.render()} ${iconToShow.render()}`;
       contentContainerEl.appendChild(legendLayersListItem);
 
       legendLayersListItem.addEventListener('click', () => {
-        const swiperLayer = element.get('id');
-        setOneSwiperLayer(swiperLayer);
+        if (options.showLayer(layerId)) {
+          resetLayerList(swiperLayers);
+        }
       });
     });
   }
@@ -199,14 +124,11 @@ const SwiperLegend = function SwiperLegend(options = {}) {
     name: 'swiperLegend',
     onInit() {},
     onAdd(evt) {
-      viewer = evt.target;
+      let viewer = evt.target;
       touchMode = 'ontouchstart' in document.documentElement;
       target = `${viewer.getMain().getId()}`;
-      map = viewer.getMap();
-
-      swiperLayersConfig = viewer.getLayers().filter(layer => layer.get('isSwiperLayer') === true);
     },
-    render() {
+    render(swiperLayers) {
       legendLayerContainer = document.createElement('div');
       legendLayerContainer.className = 'legend-layer-container';
       legendLayerContainer.classList.add('legend-layer-container', 'hidden');
@@ -233,10 +155,12 @@ const SwiperLegend = function SwiperLegend(options = {}) {
       legendLayerContainer.appendChild(contentContainerEl);
 
       makeElementDraggable(legendLayerContainer);
-      renderLayersList();
+      renderLayersList(swiperLayers);
       this.dispatch('render');
     },
-    setSwiperLegendVisible
+    setSwiperLegendVisible,
+    resetLayerList,
+    isVisible
   });
 };
 
