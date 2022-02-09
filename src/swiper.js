@@ -509,12 +509,24 @@ const Swiper = function Swiper({  circleRadius = 50,
   function addSvgIcons() {
     const svgIcons = `
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-      <symbol id="fa-code" viewBox="0 0 512 512">
-        <path d="m158 400l-14 14c-2 2-4 3-7 3-2 0-5-1-6-3l-134-133c-1-2-2-4-2-7 0-2 1-4 2-6l134-133c1-2 4-3 6-3 3 0 5 1 7 3l14 14c2 2 3 4 3 6 0 3-1 5-3 7l-112 112 112 113c2 1 3 4 3 6 0 3-1 5-3 7z m169-305l-107 369c0 2-2 4-4 5-2 2-5 2-7 1l-18-5c-2-1-4-2-5-4-1-2-2-5-1-7l107-369c0-3 2-4 4-6 2-1 5-1 7 0l18 4c2 1 4 3 5 5 1 2 2 4 1 7z m188 186l-134 133c-1 2-4 3-6 3-3 0-5-1-7-3l-14-14c-2-2-3-4-3-7 0-2 1-5 3-6l112-113-112-112c-2-2-3-4-3-7 0-2 1-4 3-6l14-14c2-2 4-3 7-3 2 0 5 1 6 3l134 133c1 2 2 4 2 6 0 3-1 5-2 7z"/>
+      <symbol id="mui-compare" viewBox="0 0 24 24">
+        <path d="M0 0h24v24H0z" fill="none"/>
+        <path d="M10 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h5v2h2V1h-2v2zm0 15H5l5-6v6zm9-15h-5v2h5v13l-5-6v9h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
       </symbol>
-        
-      <symbol id="fa-columns" viewBox="0 0 512 512">
-        <path d="m64 439l174 0 0-329-183 0 0 320c0 2 1 4 3 6 1 2 4 3 6 3z m393-9l0-320-183 0 0 329 174 0c2 0 5-1 6-3 2-2 3-4 3-6z m37-348l0 348c0 12-5 23-14 32-9 9-19 13-32 13l-384 0c-13 0-23-4-32-13-9-9-14-20-14-32l0-348c0-12 5-23 14-32 9-9 19-13 32-13l384 0c13 0 23 4 32 13 9 9 14 20 14 32z"/>
+      
+      <symbol id="mui-circle" viewBox="0 0 24 24">
+        <path d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2z"/>
+      </symbol>
+      
+      <symbol id="mui-swap-vertical" viewBox="0 0 24 24">
+        <path d="M0 0h24v24H0z" fill="none"/>
+        <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
+      </symbol>
+      
+      <symbol id="mui-swap-horizontal" viewBox="0 0 24 24">
+        <path d="M0 0h24v24H0z" fill="none"/>
+        <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
       </symbol>
     </svg>
     `;
@@ -550,7 +562,7 @@ const Swiper = function Swiper({  circleRadius = 50,
             swiperLegend.setSwiperLegendVisible(layerListOpenOnStart);
           }
         },
-        icon: '#fa-columns',
+        icon: '#mui-compare',
         tooltipText: swiperTooltip,
         tooltipPlacement: 'east',
       });
@@ -565,7 +577,7 @@ const Swiper = function Swiper({  circleRadius = 50,
             // disableSwiper();
           }
         },
-        icon: '#fa-code',
+        icon: _isMobile ? '#mui-swap-vertical' : '#mui-swap-horizontal',
         tooltipText: swipeBetweenLayersTooltip,
         tooltipPlacement: 'east',
       });
@@ -581,7 +593,7 @@ const Swiper = function Swiper({  circleRadius = 50,
               // disableCircle();
             }
           },
-          icon: '#fa-circle-o',
+          icon: '#mui-circle',
           tooltipText: circleSwipeTooltip,
           tooltipPlacement: 'east',
         });
