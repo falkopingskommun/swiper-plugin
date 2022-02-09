@@ -10,6 +10,7 @@ const Swiper = function Swiper({  circleRadius = 50,
                                   initialLayer = null,
                                   initialControl = null,
                                   backgroundGroup = 'background',
+                                  showLayerListOnStart = false,
                                   tooltips = {
                                     swiper: 'Swiper',
                                     swipeBetweenLayers: 'Split view',
@@ -45,6 +46,7 @@ const Swiper = function Swiper({  circleRadius = 50,
   const defaultLayer = initialLayer || '';
   const defaultControl = initialControl;
   const backgroundGroupName = backgroundGroup;
+  const layerListOpenOnStart = showLayerListOnStart;
   const swiperTooltip = tooltips.swiper;
   const swipeBetweenLayersTooltip = tooltips.swipeBetweenLayers;
   const circleSwipeTooltip = tooltips.circleSwipe;
@@ -544,6 +546,8 @@ const Swiper = function Swiper({  circleRadius = 50,
               }
             }
             isSwiperToolsOpen = true;
+
+            swiperLegend.setSwiperLegendVisible(layerListOpenOnStart);
           }
         },
         icon: '#fa-columns',
