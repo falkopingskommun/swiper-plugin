@@ -55,7 +55,6 @@ Note. If you are using the suggestion above, it is also recommended that the dup
 ## Swiper settings
 
 - `circleRadius`: used for the Clip (circle) plugin, the default is 50 (meters)
-- `circleZIndex`: default 1. Used to force the layer in the Clip (circle) to always be on top of any other layers. The default `1` will make the circle to be on top, adjust accordingly in case any layer has an already zIndex.
 - `initialLayer`: indicate the name of the layer which should be picked when first enabling the tool. Default value is null and will pick the first swiper layer.
 - `initialControl`: [null|swipe|clip] chooose between the two tools to be enable on when swiper is enabled. Default value is null.
 - `backgroundGroup`: name of the background group layers, the default 'background'. Needed when handing edge cases such as when the user is trying to show the same layer on both sides
