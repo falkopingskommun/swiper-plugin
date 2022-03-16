@@ -20,8 +20,7 @@ Declare circleRadius to the size of the circle layer.
 </script>
 ```
 
-In the Origo project index.json set `isSwiperLayer = true` to any background layer
-you wish the swiper plugin have access to show in the second view.
+In the Origo project index.json set `isSwiperLayer = true` to any layer you wish the swiper plugin have access to show in the second view.
 
 ```json
 {
@@ -37,6 +36,21 @@ you wish the swiper plugin have access to show in the second view.
     "isSwiperLayer": true
 },
 ```
+
+To have a better control (and the swiper layers do not interfeer with the legend) we recomend to duplicate the swiper layer in the config file and add the following changes
+
+```json
+{
+    "group": "none",
+    "name": "originalName__swiper",
+    "visible": false,
+    "isSwiperLayer": true
+},
+```
+
+These settings will make the layer different from the ones used/displayed in the legend (`group:none`). The layer should be not visible by default and the name should be similar but have the double underscore with an additional name to differenciate the layers.
+
+Note. If you are using the suggestion above, it is also recommended that the duplicated layers should be set above the layers, so when displaying them they will be on top. (If you put them at the end of your json file they will be hidden when trying to display them).
 
 ## Swiper settings
 

@@ -98,7 +98,7 @@ const Swiper = function Swiper({  circleRadius = 50,
     }
 
     // setting left layer ... if old layer is in use => get a new one
-    if (!_visibleLeftLayer || _swLayers[_visibleLeftLayer.get('id')].inUse()) {
+    if (!_visibleLeftLayer || _swLayers[_visibleLeftLayer.get('name')].inUse()) {
       let visibleLeftKey = keys.find(lk => !_swLayers[lk].getLayer().get('visible'));
       _visibleLeftLayer = _swLayers[visibleLeftKey].getLayer();
       _swLayers[visibleLeftKey].setAsShown();
@@ -157,7 +157,21 @@ const Swiper = function Swiper({  circleRadius = 50,
     }
 
     disableVisibilityEvent();
-    const layerId = layer.get('id');
+    const whatType = layer.get('type');
+    if (whatType == 'GROUP') {
+      var children = layer.get('layers');
+      children.forEach(childLayer => {
+        if (showLayer) {
+          controller.removeLayer(childLayer);
+          controller.addLayer(childLayer);
+        } else {
+          controller.removeLayer(childLayer);
+        }
+        
+        childLayer.setVisible(showLayer);
+      });
+    }
+    const layerId = layer.get('name');
     if (showLayer) {
       controller.removeLayer(layer);
       controller.addLayer(layer);
@@ -386,7 +400,7 @@ const Swiper = function Swiper({  circleRadius = 50,
       return;
     }
 
-    const layerId = visibilityChangeEvent.target.get('id');
+    const layerId = visibilityChangeEvent.target.get('name');
     const currentVisibility = !visibilityChangeEvent.oldValue;
     console.log(layerId, 'visibility:', currentVisibility, new Date());
     _memorySwitch.push({ layerId, currentVisibility});
@@ -444,11 +458,11 @@ const Swiper = function Swiper({  circleRadius = 50,
   
   function setSwiperLayers(layers) {
     layers.forEach(la => {
-      const layerId = la.get('id');
-      _swLayers[layerId] = new SwiperLayer(la, false, false);
+      const layerName = la.get('name');
+      _swLayers[layerName] = new SwiperLayer(la, false, false);
 
       // setting the default layer
-      if (la.get('name').toLowerCase() === defaultLayer.toLowerCase()) {
+      if (layerName.toLowerCase() === defaultLayer.toLowerCase()) {
         console.log('default layer set:', defaultLayer);
         _visibleLeftLayer = la;
       }
