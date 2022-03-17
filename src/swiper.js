@@ -3,6 +3,7 @@ import ol_control_Swipe from 'ol-ext/control/Swipe';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
 import SwiperLayer from './swiperLayer';
 import SwiperLegend from './swiperLegend';
+import ManipulateLayers from './manipulateLayers';
 import { checkIsMobile } from './functions';
 
 const Swiper = function Swiper({  circleRadius = 50,
@@ -10,6 +11,7 @@ const Swiper = function Swiper({  circleRadius = 50,
                                   initialControl = null,
                                   backgroundGroup = 'background',
                                   showLayerListOnStart = false,
+                                  origoConfig = null,
                                   tooltips = {
                                     swiper: 'Swiper',
                                     swipeBetweenLayers: 'Split view',
@@ -48,6 +50,7 @@ const Swiper = function Swiper({  circleRadius = 50,
   const swipeBetweenLayersTooltip = tooltips.swipeBetweenLayers;
   const circleSwipeTooltip = tooltips.circleSwipe;
   const layerListTooltip = tooltips.layerList;
+  const origoConfigPath = origoConfig;
 
   // tool buttons
   let swiperMainButton;
@@ -233,7 +236,8 @@ const Swiper = function Swiper({  circleRadius = 50,
 
   // get swiperlayers from config file in origo
   function findSwiperLayers(viewer) {
-    swiperEnabledLayers = viewer.getLayers().filter(layer => layer.get('isSwiperLayer'));
+    swiperEnabledLayers = viewer.getLayers().filter(layer => layer.get('isSwiperLayer')
+    && layer.get('name').endsWith('__swiper'));
     return swiperEnabledLayers;
   }
   
@@ -627,23 +631,31 @@ const Swiper = function Swiper({  circleRadius = 50,
       // 4.1.1 if it does not affect the left => just show it in the right, mark it as inUsed (right=true)
       //      and it should be disabled to select on the swiperLegend
       // 4.1.2 if affects left (is the same as left) => pick first in the SwiperLayer list which is not in Use and show it (mark it left=true)
-
-      const isSetup = setupLayers(viewer);
-      if (!isSetup) {
-        console.log('No swiper layers defined. Tool will not be added to the map.');
-        return;
+      
+      // if there is an origoPath => close the swiperLayers
+      let promise = Promise.resolve();
+      if (origoConfigPath) {
+        promise = ManipulateLayers(viewer, origoConfigPath);
       }
-
-      touchMode = 'ontouchstart' in document.documentElement;
-      target = `${viewer.getMain().getMapTools().getId()}`;
-      let components = [swiperMainButton, swiperButton];
-      if (!_isMobile) {
-        components.push(circleButton);
-      }
-      components.push(swiperLegendButton);
-      this.addComponents(components);
-      viewer.addComponent(swiperLegend);
-      this.render();
+      
+      promise.then(res => {
+        const isSetup = setupLayers(viewer);
+        if (!isSetup) {
+          console.log('No swiper layers defined. Tool will not be added to the map.');
+          return;
+        }
+  
+        touchMode = 'ontouchstart' in document.documentElement;
+        target = `${viewer.getMain().getMapTools().getId()}`;
+        let components = [swiperMainButton, swiperButton];
+        if (!_isMobile) {
+          components.push(circleButton);
+        }
+        components.push(swiperLegendButton);
+        this.addComponents(components);
+        viewer.addComponent(swiperLegend);
+        this.render();
+      });
     },
     render() {
       // Make an html fragment of buttonsContainer, add to DOM and sets DOM-node in module for easy access

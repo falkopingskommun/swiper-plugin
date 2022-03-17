@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "core-js": "^3.9.0",
+    "ol": "^6.5.0",
     "ol-ext": "^3.1.18",
-    "ol": "^6.5.0"
+    "whatwg-fetch": "^3.5.0"
   }
 }
