@@ -150,3 +150,52 @@ div.ol-swipe.ol-unselectable.ol-control button {
   content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg>');
 }
 
+.ol-swipe .label {
+
+  &.warn::before, &.warn::after {
+    background-color: #c33932;
+  }
+
+  &::before, &::after {
+    position: absolute;
+    background: rgba(51, 51, 51, 0.85);
+    border-radius: 4px;
+    border-width: 10px;
+    color: #fff;
+    font-size: 0.85em;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    white-space: nowrap;
+    width: auto;
+  }
+
+  &::before {
+    content: attr(label-left);
+  }
+
+  &::after {
+    content: attr(label-right);
+  }
+
+  &.mobile::before {
+    bottom: calc(100% + 1em);
+    right: 0;
+  }
+
+  &:not(.mobile)::before {
+    right: calc(100% + 1em);
+    bottom: 0;
+  }
+
+  &.mobile::after {
+    top: calc(100% + 1em);
+    right: 0;
+  }
+
+  &:not(.mobile)::after {
+    left: calc(100% + 1em);
+    bottom: 0;
+  }
+
+}

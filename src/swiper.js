@@ -103,6 +103,34 @@ const Swiper = function Swiper({  circleRadius = 50,
     }
   }
 
+  function getRightLayer() {
+    let underSwiperLayers = viewer.getLayersByProperty('isUnderSwiper', true).filter(layer => layer.get('visible'));
+    return underSwiperLayers[underSwiperLayers.length - 1];
+  }
+
+  function setLayerLabels() {
+    const labelId = 'swiperLabel';
+    const layerRight = getRightLayer();
+    let label = document.getElementById(labelId);
+    if (!label) {
+      label = document.createElement('span');
+    }
+    const nameLeft = _visibleLeftLayer ? _visibleLeftLayer.get('title') : '';
+    const nameRight = layerRight ? layerRight.get('title') : '';
+    label.setAttribute('id', labelId);
+    label.setAttribute('label-left', nameLeft);
+    label.setAttribute('label-right', nameRight);
+    _isMobile && label.classList.add('mobile');
+
+    label.classList.add('label');
+    label.classList.remove('warn');
+    if (_visibleLeftLayer.get('name').split('__')[0] === layerRight.get('name').split('__')[0]) {
+      label.classList.add('warn');
+    }
+
+    swiperControl.element.appendChild(label);
+  }
+
   function enableSwiper() {
     let isNew = true;
     if (!swiperControl) {
@@ -125,6 +153,7 @@ const Swiper = function Swiper({  circleRadius = 50,
       // left
       showLayerOnController(swiperControl, _visibleLeftLayer);
     }
+    setLayerLabels();
     setSwiperVisible(true);
 
     swiperLegend.resetLayerList(_swLayers);
@@ -379,6 +408,8 @@ const Swiper = function Swiper({  circleRadius = 50,
   let _switchOuterLayersTimeout = null;
   let _memorySwitch = [];
   function doesChangeAffectLayerVisibility(visibilityChangeEvent) {
+    setLayerLabels();
+
     if (!isVisibilityEventEnabled()) {
       return;
     }
