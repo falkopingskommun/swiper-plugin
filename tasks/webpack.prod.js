@@ -1,6 +1,6 @@
 const webpack = require("webpack");
 const { merge } = require("webpack-merge");
-const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const common = require("./webpack.common.js");
 
@@ -8,6 +8,16 @@ module.exports = merge(common, {
   optimization: {
     nodeEnv: "production",
     minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+        extractComments: false,
+        terserOptions: {
+          compress: {
+            drop_console: true
+          }
+        }
+      })]
   },
   performance: {
     hints: false,
@@ -51,17 +61,6 @@ module.exports = merge(common, {
     ],
   },
   plugins: [
-    new UglifyJSPlugin({
-      uglifyOptions: {
-        output: {
-          beautify: false,
-        },
-        compress: {
-          // remove console.logs
-          drop_console: true,
-        },
-      },
-    }),
     new webpack.optimize.AggressiveMergingPlugin(),
     new MiniCssExtractPlugin({
       filename: "../css/swiper.css",
