@@ -109,6 +109,8 @@ const Swiper = function Swiper({  circleRadius = 50,
   }
 
   function setLayerLabels() {
+    if (!swiperControl) return;
+    
     const labelId = 'swiperLabel';
     const layerRight = getRightLayer();
     let label = document.getElementById(labelId);
