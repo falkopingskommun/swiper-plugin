@@ -33,7 +33,7 @@ module.exports = merge(common, {
   },
   plugins: [new WriteFilePlugin()],
   devServer: {
-    contentBase: "./",
+    static: "./",
     port: 9008,
   },
 });
