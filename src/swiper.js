@@ -3,6 +3,7 @@ import ol_control_Swipe from 'ol-ext/control/Swipe';
 import ol_interaction_Clip from 'ol-ext/interaction/Clip';
 import SwiperLayer from './swiperLayer';
 import SwiperLegend from './swiperLegend';
+import ManipulateLayers from './manipulateLayers';
 import { checkIsMobile } from './functions';
 
 const Swiper = function Swiper({  circleRadius = 50,
@@ -10,6 +11,7 @@ const Swiper = function Swiper({  circleRadius = 50,
                                   initialControl = null,
                                   backgroundGroup = 'background',
                                   showLayerListOnStart = false,
+                                  origoConfig = null,
                                   tooltips = {
                                     swiper: 'Swiper',
                                     swipeBetweenLayers: 'Split view',
@@ -35,7 +37,7 @@ const Swiper = function Swiper({  circleRadius = 50,
   let isSwiperVisible = false;
   let isCircleVisible = false;
 
-  let swiperEnabledLayers;
+  let nonSwiperLayers;
   let otherLayers; // this are other layers
 
   // tool options
@@ -48,6 +50,7 @@ const Swiper = function Swiper({  circleRadius = 50,
   const swipeBetweenLayersTooltip = tooltips.swipeBetweenLayers;
   const circleSwipeTooltip = tooltips.circleSwipe;
   const layerListTooltip = tooltips.layerList;
+  const origoConfigPath = origoConfig;
 
   // tool buttons
   let swiperMainButton;
@@ -62,6 +65,8 @@ const Swiper = function Swiper({  circleRadius = 50,
   let swiperButtonEl;
   let circleButtonEl;
   let swiperLegendButtonEl;
+
+  const LayerOnTopOfSwiperZindex = 10;
 
   function showMenuButtons() {
     swiperMainButtonEl.classList.add('active');
@@ -103,8 +108,20 @@ const Swiper = function Swiper({  circleRadius = 50,
     }
   }
 
+  function setIndexOfLayersOnTopOfSwiper(index) {
+    const layersOnTopOfSwiper = viewer.getLayers().filter(l => !l.get('isSwiperLayer') && !l.get('isUnderSwiper'));
+    layersOnTopOfSwiper.forEach(l => {
+      l.setZIndex(index);
+    })
+  }
+
   function getRightLayer() {
-    let underSwiperLayers = viewer.getLayersByProperty('isUnderSwiper', true).filter(layer => layer.get('visible'));
+    let underSwiperLayers = viewer
+      .getLayers()
+      .filter(
+        layer =>
+          layer.get('visible') && (layer.get('isUnderSwiper') || (layer.get('isSwiperLayer') && !layer.get('name').endsWith('__swiper')))
+      );
     return underSwiperLayers[underSwiperLayers.length - 1];
   }
 
@@ -117,16 +134,18 @@ const Swiper = function Swiper({  circleRadius = 50,
     if (!label) {
       label = document.createElement('span');
     }
-    const nameLeft = _visibleLeftLayer ? _visibleLeftLayer.get('title') : '';
-    const nameRight = layerRight ? layerRight.get('title') : '';
+    const titleLeft = _visibleLeftLayer ? _visibleLeftLayer.get('title') : '';
+    const titleRight = layerRight ? layerRight.get('title') : '';
+    const nameLeft = _visibleLeftLayer ? _visibleLeftLayer.get('name').split('__')[0] : '';
+    const nameRight = layerRight ? layerRight.get('name').split('__')[0] : '';
     label.setAttribute('id', labelId);
-    label.setAttribute('label-left', nameLeft);
-    label.setAttribute('label-right', nameRight);
+    label.setAttribute('label-left', titleLeft);
+    label.setAttribute('label-right', titleRight);
     _isMobile && label.classList.add('mobile');
 
     label.classList.add('label');
     label.classList.remove('warn');
-    if (_visibleLeftLayer.get('name').split('__')[0] === layerRight.get('name').split('__')[0]) {
+    if (nameLeft === nameRight) {
       label.classList.add('warn');
     }
 
@@ -264,8 +283,15 @@ const Swiper = function Swiper({  circleRadius = 50,
 
   // get swiperlayers from config file in origo
   function findSwiperLayers(viewer) {
-    swiperEnabledLayers = viewer.getLayers().filter(layer => layer.get('isSwiperLayer'));
-    return swiperEnabledLayers;
+    nonSwiperLayers = viewer.getLayers().filter(layer => layer.get('isSwiperLayer')
+      && layer.get('name').endsWith('__swiper'));
+    return nonSwiperLayers;
+  }
+
+  // get swiperlayers from config file in origo
+  function findNonSwiperLayers(viewer) {
+    nonSwiperLayers = viewer.getLayers().filter(layer => !layer.get('name').endsWith('__swiper'));
+    return nonSwiperLayers;
   }
   
   function resetSwiperLayer(layerId) {
@@ -495,7 +521,7 @@ const Swiper = function Swiper({  circleRadius = 50,
 
     // not swiper layers 
     if (!otherLayers) {
-      otherLayers = viewer.getLayers().filter(layer => !layer.get('isSwiperLayer'));
+      otherLayers = findNonSwiperLayers(viewer);
     }
     otherLayers.forEach(la => {
       la.on('change:visible', doesChangeAffectLayerVisibility);
@@ -528,6 +554,7 @@ const Swiper = function Swiper({  circleRadius = 50,
   }
 
   function closeSwiperTool() {
+    setIndexOfLayersOnTopOfSwiper(0);
     disableCircle();
     disableSwiper();
     hideMenuButtons();
@@ -589,6 +616,7 @@ const Swiper = function Swiper({  circleRadius = 50,
             }
             isSwiperToolsOpen = true;
 
+            setIndexOfLayersOnTopOfSwiper(LayerOnTopOfSwiperZindex);
             swiperLegend.setSwiperLegendVisible(layerListOpenOnStart);
           }
         },
@@ -660,23 +688,31 @@ const Swiper = function Swiper({  circleRadius = 50,
       // 4.1.1 if it does not affect the left => just show it in the right, mark it as inUsed (right=true)
       //      and it should be disabled to select on the swiperLegend
       // 4.1.2 if affects left (is the same as left) => pick first in the SwiperLayer list which is not in Use and show it (mark it left=true)
-
-      const isSetup = setupLayers(viewer);
-      if (!isSetup) {
-        console.log('No swiper layers defined. Tool will not be added to the map.');
-        return;
+      
+      // if there is an origoPath => close the swiperLayers
+      let promise = Promise.resolve();
+      if (origoConfigPath) {
+        promise = ManipulateLayers(viewer, origoConfigPath);
       }
-
-      touchMode = 'ontouchstart' in document.documentElement;
-      target = `${viewer.getMain().getMapTools().getId()}`;
-      let components = [swiperMainButton, swiperButton];
-      if (!_isMobile) {
-        components.push(circleButton);
-      }
-      components.push(swiperLegendButton);
-      this.addComponents(components);
-      viewer.addComponent(swiperLegend);
-      this.render();
+      
+      promise.then(res => {
+        const isSetup = setupLayers(viewer);
+        if (!isSetup) {
+          console.log('No swiper layers defined. Tool will not be added to the map.');
+          return;
+        }
+  
+        touchMode = 'ontouchstart' in document.documentElement;
+        target = `${viewer.getMain().getMapTools().getId()}`;
+        let components = [swiperMainButton, swiperButton];
+        if (!_isMobile) {
+          components.push(circleButton);
+        }
+        components.push(swiperLegendButton);
+        this.addComponents(components);
+        viewer.addComponent(swiperLegend);
+        this.render();
+      });
     },
     render() {
       // Make an html fragment of buttonsContainer, add to DOM and sets DOM-node in module for easy access
