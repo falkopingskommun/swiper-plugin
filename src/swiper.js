@@ -8,6 +8,7 @@ import { checkIsMobile } from './functions';
 
 const Swiper = function Swiper({  circleRadius = 50,
                                   initialLayer = null,
+                                  alwaysOnTop = false,
                                   initialControl = null,
                                   backgroundGroup = 'background',
                                   showLayerListOnStart = false,
@@ -109,6 +110,8 @@ const Swiper = function Swiper({  circleRadius = 50,
   }
 
   function setIndexOfLayersOnTopOfSwiper(index) {
+    // Skip if swiper layers always should be on top.
+    if (alwaysOnTop) return;
     const layersOnTopOfSwiper = viewer.getLayers().filter(l => !l.get('isSwiperLayer') && !l.get('isUnderSwiper'));
     layersOnTopOfSwiper.forEach(l => {
       l.setZIndex(index);
@@ -120,7 +123,10 @@ const Swiper = function Swiper({  circleRadius = 50,
       .getLayers()
       .filter(
         layer =>
-          layer.get('visible') && (layer.get('isUnderSwiper') || (layer.get('isSwiperLayer') && !layer.get('name').endsWith('__swiper')))
+          // all visible non-swiper layers. Only if swiper layers always are on top
+          (alwaysOnTop && layer.get('visible') && !layer.get('name').endsWith('__swiper') && layer.get('group') !== 'none')
+          // only visible non-swiper layers that are beneath the swiper
+          || (layer.get('visible') && (layer.get('isUnderSwiper') || (layer.get('isSwiperLayer') && !layer.get('name').endsWith('__swiper'))))
       );
     return underSwiperLayers[underSwiperLayers.length - 1];
   }
@@ -504,7 +510,7 @@ const Swiper = function Swiper({  circleRadius = 50,
       _swLayers[layerName] = new SwiperLayer(la, false, false);
 
       // setting the default layer
-      if (layerName.toLowerCase() === defaultLayer.toLowerCase()) {
+      if (layerName.replace('__swiper', '').toLowerCase() === defaultLayer.toLowerCase()) {
         console.log('default layer set:', defaultLayer);
         _visibleLeftLayer = la;
       }
