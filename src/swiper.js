@@ -123,10 +123,8 @@ const Swiper = function Swiper({  circleRadius = 50,
       .getLayers()
       .filter(
         layer =>
-          // all visible non-swiper layers. Only if swiper layers always are on top
-          (alwaysOnTop && layer.get('visible') && !layer.get('name').endsWith('__swiper') && layer.get('group') !== 'none')
           // only visible non-swiper layers that are beneath the swiper
-          || (layer.get('visible') && (layer.get('isUnderSwiper') || (layer.get('isSwiperLayer') && !layer.get('name').endsWith('__swiper'))))
+          (layer.get('visible') && (layer.get('isUnderSwiper') || (layer.get('isSwiperLayer') && !layer.get('name').endsWith('__swiper'))))
       );
     return underSwiperLayers[underSwiperLayers.length - 1];
   }
