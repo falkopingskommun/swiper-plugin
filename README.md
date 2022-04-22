@@ -1,9 +1,10 @@
-# swiper
+# Swiper
+
+Swiper plugin can be used to compare two different views in Origo.
 
 ## To use the plugin
 
 In the Origo project index.html import swiper component
-Declare circleRadius to the size of the circle layer.
 
 ```html
 <!--Add in header-->
@@ -14,62 +15,79 @@ Declare circleRadius to the size of the circle layer.
 <script type="text/javascript">
   const origo = Origo('index.json');
   origo.on('load', function (viewer) {
-    const swiper = Swiper({ circleRadius: 100 });
+    var swiper = Swiper({
+      origoConfig: 'index.json',
+	circleRadius: 150,
+	alwaysOnTop: false,
+	initialLayer: "ortofoto_2021",
+	initialControl: 'swipe',
+	showLayerListOnStart: true,
+	tooltips: {
+		swiper: 'Jämför kartvyer',
+		swipeBetweenLayers: 'Jämför sida-sida',
+           	circleSwipe: 'Jämför med kikhål',
+           	layerList: 'Välj lager från lista'
+		}
+	});
     viewer.addComponent(swiper);
   });
 </script>
 ```
 
-In the Origo project index.json set `isSwiperLayer = true` to any layer you wish the swiper plugin have access to show in the second view.
+In the Origo project index.json set `"isSwiperLayer": true` to any layer you wish the swiper plugin have access to show in the second view.
 
 ```json
 {
     "attribution": "&copy Lantmäteriet geodatasamverkan",
     "format": "image/png",
     "group": "background",
-    "name": "SIG:topowebbkartan_nedtonad",
+    "name": "ortofoto_2021",
     "source": "basemap",
-    "title": "Karta, grå",
+    "title": "Ortofoto 2021",
     "type": "WMTS",
-    "style": "karta_gra",
+    "style": "orto",
     "visible": true,
     "isSwiperLayer": true
 },
 ```
-
-To have a better control (and the swiper layers do not interfeer with the legend) we recomend to duplicate the swiper layer in the config file and add the following changes
+For layers that isn't a swiper layer but should be under any swiper layer, if using `alwaysOnTop: false`, set `"isUnderSwiper": true` in the Origo project index.json. Layers with this setting will have labels.
 
 ```json
 {
-    "group": "none",
-    "name": "originalName__swiper",
-    "visible": false,
-    "isSwiperLayer": true
+    "attribution": "&copy Lantmäteriet geodatasamverkan",
+    "format": "image/png",
+    "group": "any_group",
+    "name": "terrangkarta",
+    "source": "local",
+    "title": "Terrängkarta",
+    "type": "WMTS",
+    "style": "terrangkarta",
+    "visible": true,
+    "isUnderSwiper": true
 },
 ```
 
-These settings will make the layer different from the ones used/displayed in the legend (`group:none`). The layer should be not visible by default and the name should be similar but have the double underscore with an additional name to differenciate the layers.
-
-Note. If you are using the suggestion above, it is also recommended that the duplicated layers should be set above the layers, so when displaying them they will be on top. (If you put them at the end of your json file they will be hidden when trying to display them).
-
 ## Swiper settings
 
-- `circleRadius`: used for the Clip (circle) plugin, the default is 50 (meters)
-- `initialLayer`: indicate the name of the layer which should be picked when first enabling the tool. Default value is null and will pick the first swiper layer.
-- `initialControl`: [null|swipe|clip] chooose between the two tools to be enable on when swiper is enabled. Default value is null.
-- `backgroundGroup`: name of the background group layers, the default 'background'. Needed when handing edge cases such as when the user is trying to show the same layer on both sides
-- `showLayerListOnStart`: default `false`. Indicates if the layer list should be open when the starting Swiper.
-- `tooltips`: object which contains the tooltip text for the existing buttons
-  - `swiper`: the main button to show the overlay options
-  - `swipeBetweenLayers`: enables the split screen
-  - `circleSwipe`: shows the circle overlay option, toggles between the two effects
-  - `layerList`: shows the list of swiper enabled layers
+Option | Type | Description
+---|---|---
+`OrigoConfig` | string | Used to duplicate layers to the plugin. - Required
+`circleRadius` | number | Radius in meters for the circle - Default is `50`
+`alwaysOnTop` | boolean | Whether or not the swiper layers should be on top of all layers from Origo. If false then only Origo layers with `"isUnderSwiper": true` will be under the swiper layers. - Default is `false`
+`initialLayer` | string | The name of the layer which should be picked when first enabling the tool. - Default is `null` and will pick the first swiper layer
+`initialControl` | array | [null/swipe/clip] Tool to be enable when the swiper is enabled - Default is `null`
+`showLayerListOnStart` | boolean | If the layer list should be open when starting the swiper. - Default is `false`
+`tooltips` | object | Contains the tooltip text for the existing buttons
+`swiper` | string | The main button to show the overlay options
+`swipeBetweenLayers` | string | Enables the split screen
+`circleSwipe` | string | Enables the circle overlay option, toggles between the two effects
+`layerList` | string | Shows the list of swiper enabled layers
 
-## Limitations
-
-The Swiper tools (the clip and the swipe) do not support showing the same layer as the already visible layer. In the case the user selects the same layer, the tool will close and simply show the visible layers.
 
 ## Plugins used:
 
 1. [ol-ext/interaction/Clip](http://viglino.github.io/ol-ext/examples/interaction/map.interaction.clip.html). This is to show a circle and a different map layer in it.
-2. [ol-ext/contol/Swipe](http://viglino.github.io/ol-ext/examples/control/map.control.swipe.html). This is to split the map view in two. Boths sides will show different layers. Note that the same layer can not be shown in both sides, this is a limitation no the tool, but it also does not make sense to show the same layer on both sides.
+2. [ol-ext/contol/Swipe](http://viglino.github.io/ol-ext/examples/control/map.control.swipe.html). This is to split the map view in two. Boths sides will show different layers.
+
+## Demo
+![swiper_demo](https://user-images.githubusercontent.com/17123002/164747711-72eeaeae-e35a-483a-9cf0-b445e9f3f033.gif)
