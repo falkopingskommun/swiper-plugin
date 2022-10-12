@@ -675,7 +675,7 @@ const Swiper = function Swiper({  circleRadius = 50,
 
       buttonsContainer = Origo.ui.Element({
         tagName: 'div',
-        cls: 'flex column',
+        cls: 'flex row',
       });
     },
     onAdd(evt) {
