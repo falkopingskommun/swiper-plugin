@@ -1,4 +1,3 @@
-import permalink from './utils/permalink/permalink';
 import stripJSONComments from './utils/stripjsoncomments';
 
 const ManipulateLayers = function ManipulateLayers(viewer, origoPath) {
@@ -8,7 +7,7 @@ const ManipulateLayers = function ManipulateLayers(viewer, origoPath) {
   function createSwiperLayers() {
     let url = window.location.href + '\\' + _origoPath;
     if (window.location.hash) {
-      const urlParams = permalink.parsePermalink(window.location.href);
+      const urlParams = viewer.permalink.parsePermalink(window.location.href);
       if (urlParams.map) {
         url = `${urlParams.map}.json`;
       }
